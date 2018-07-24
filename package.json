@@ -1,0 +1,48 @@
+{
+  "name": "deep-mutation",
+  "version": "1.0.0",
+  "author": {
+    "name": "Shelest Denis",
+    "email": "axules@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/axules/deep-mutation/issues"
+  },
+  "contributors": [
+    {
+      "name": "Denis Shelest",
+      "email": "axules@gmail.com"
+    }
+  ],
+  "main": "src/index.js",
+  "deprecated": false,
+  "description": "The mutate method returns new object with changes",
+  "keywords": [
+    "assign",
+    "object",
+    "deep",
+    "state",
+    "mutable",
+    "redux"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/axules/deep-mutation.git"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^23.4.1",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.6",
+    "babel-jest": "^23.4.0",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-0": "^6.24.1"
+  },
+  "files": [
+    "src"
+  ]
+}
