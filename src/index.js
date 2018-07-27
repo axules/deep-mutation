@@ -21,7 +21,11 @@ function mutateObj(point, vType = mutateTypes.default) {
 function extToArray(pExt) {
   if (Array.isArray(pExt)) return pExt;
   const keys = Object.keys(pExt || {});
-  return keys.map( key => ([key, pExt[key]]));
+  return keys.map( key => 
+    pExt[key] === undefined 
+      ? [key] 
+      : [key, pExt[key]]
+  );
 }
 /* ############################################################################# */
 function separatePath(path) {
