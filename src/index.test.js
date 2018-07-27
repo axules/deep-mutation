@@ -42,6 +42,7 @@ const simpleArraysData = [
   [{ a: [1] }, { 'a.[]': 5 }, { a: [1, 5] }],
   [{ a: [1] }, { 'a.[0]': 5 }, { a: [5] }],
   [{ a: { aa: 10 } }, { 'a.aa': 5 }, { a: { aa: 5 } }],
+  [{ a: { aa: 10 } }, { 'a.aa': undefined, 'a.aaa': 99 }, { a: { aaa: 99 } }],
   // set object, extend object
   [{ a: 10 }, [['a', { aa: 5 }]], { a: { aa: 5 } }],
   [{ a: 10 }, [['a', { aa: { aaa: 5 } }]], { a: { aa: { aaa: 5 } } }],
