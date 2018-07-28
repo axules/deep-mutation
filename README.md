@@ -211,14 +211,18 @@ export default (state = {}, action) => {
 
 ### In component state
 ```javascript
-// ...
-onClick = () => this.setState(state =>
-    mutate(state, {
-        'isFetching': true,
-        'data.value': 'default',
-        'data.key': null,
-        'validation': null
-    })
-);
-// ...
+import mutate from 'deep-mutation';
+
+class ExampleComponent extends Component {
+    // ...
+    onClick = () => this.setState(state =>
+        mutate(state, {
+            isFetching: true,
+            'data.value': 'default',
+            'data.key': null,
+            validation: null
+        })
+    );
+    // ...
+}
 ```
