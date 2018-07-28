@@ -23,7 +23,8 @@
     "deep",
     "state",
     "mutable",
-    "redux"
+    "redux",
+    "immutable"
   ],
   "license": "MIT",
   "repository": {
