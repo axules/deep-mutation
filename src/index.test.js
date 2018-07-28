@@ -85,7 +85,7 @@ describe('mutate: ', () => {
     const obj = { a: 1 };
     const changes = [];
     const result = mutate(obj, changes);
-    expect(result === obj).toBe(false);
+    expect(result).not.toBe(obj);
   });
 
   test.each(simpleArraysData)('mutate(%j   +   %j)', (obj, changes, expected) => {
@@ -97,22 +97,22 @@ describe('mutate: ', () => {
     const obj = { a: { aa: { aaa: 10 }, aa2: { aa2a: 5 } }, b: { bb: { bbb: 1 } }, c: { cc: { ccc: 1 } } };
     const changes = [['a.aa.aaa', 15], ['c.cc2', 7]];
     const result = mutate(obj, changes);
-    expect(result === obj).toBe(false);
-    expect(result.a === obj.a).toBe(false);
+    expect(result).not.toBe(obj);
+    expect(result.a).not.toBe(obj.a);
 
-    expect(result.a.aa === obj.a.aa).toBe(false);
-    expect(result.a.aa.aaa === obj.a.aa.aaa).toBe(false);
+    expect(result.a.aa).not.toBe(obj.a.aa);
+    expect(result.a.aa.aaa).not.toBe(obj.a.aa.aaa);
 
-    expect(result.a.aa2 === obj.a.aa2).toBe(true);
-    expect(result.a.aa2.aa2a === obj.a.aa2.aa2a).toBe(true);
+    expect(result.a.aa2).toBe(obj.a.aa2);
+    expect(result.a.aa2.aa2a).toBe(obj.a.aa2.aa2a);
 
-    expect(result.b === obj.b).toBe(true);
-    expect(result.b.bb === obj.b.bb).toBe(true);
-    expect(result.b.bb.bbb === obj.b.bb.bbb).toBe(true);
+    expect(result.b).toBe(obj.b);
+    expect(result.b.bb).toBe(obj.b.bb);
+    expect(result.b.bb.bbb).toBe(obj.b.bb.bbb);
 
-    expect(result.c === obj.c).toBe(false);
-    expect(result.c.cc === obj.c.cc).toBe(true);
-    expect(result.c.cc2 === obj.c.cc2).toBe(false);
-    expect(result.c.cc.ccc === obj.c.cc.ccc).toBe(true);
+    expect(result.c).not.toBe(obj.c);
+    expect(result.c.cc).toBe(obj.c.cc);
+    expect(result.c.cc2).not.toBe(obj.c.cc2);
+    expect(result.c.cc.ccc).toBe(obj.c.cc.ccc);
   });
 });
