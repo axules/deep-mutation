@@ -1,7 +1,9 @@
 function XMutateRemovedElementX() {}
-function XMutateNewElementX(value) {
+function XMutateLockedElementX(value) {
   this.__value__ = value;
 }
+
+const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\].]*)\\]$');
 /* ############################################################################# */
 const mutateTypes = {
   array: 'array',
@@ -37,30 +39,49 @@ function separatePath(path) {
   );
 }
 /* ############################################################################# */
+function setValue(parent, key, value) {
+  const isLocked = checkIsLocked(parent);
+  const isRemove = value instanceof XMutateRemovedElementX;
+  const isUKey = key === undefined;
+  const isHasKey = key ? parent.hasOwnProperty(key) : true;
+  
+  if (isRemove && isUKey) return parent;
+  if (isRemove && !isHasKey) return parent;
+  if (isUKey) {
+    if (isLocked) parent.__value__ = value;
+    else return value;
+  } else {
+    const realParent = isLocked ? parent.__value__ : parent;
+    if (isRemove) {
+      if (Array.isArray(realParent)) realParent.slice(key, 1);
+      else delete realParent[key];
+    } else realParent[key] = value;
+  }
+
+  return parent;
+}
+/* ############################################################################# */
+function checkIsLocked(obj) {
+  return obj instanceof XMutateLockedElementX;
+}
+/* ############################################################################# */
 function extToTree(pExt) {
   // +++++++++++++++++++++++++++
   function pairValue(pair, isMutated) {
     if (pair.length === 1) {
-      return isMutated 
-        ? undefined 
-        : new XMutateRemovedElementX();
+      return new XMutateRemovedElementX();
     }
 
     if (
       !isMutated 
-      && pair[1] 
       && pair[1] instanceof Object 
-      && !Array.isArray(pair[1])
-    ) {
-      return new XMutateNewElementX(pair[1]);
-    }
+    ) return new XMutateLockedElementX(pair[1]);
 
     return pair[1];
   }
   // +++++++++++++++++++++++++++
   if (!(pExt instanceof Object)) throw new Error('Changes should be Object or Array');
   const values = extToArray(pExt);
-    
   return values.reduce((FULL_RESULT, PAIR) => {
     if (!PAIR) return FULL_RESULT;
     if (typeof(PAIR) === 'string') PAIR = [PAIR];
@@ -68,31 +89,46 @@ function extToTree(pExt) {
 
     const pieces = separatePath(PAIR[0]).split('.');
     
-    let isMutatedObj = false;
-    pieces.reduce((R, cur, curI) => {
-      if (cur === '[]') {
-        cur = `[+${String(Math.random()).slice(2, 12)}]`;
+    let isLockedPath = false;
+    pieces.reduce((parent, currentKey, currentI) => {
+      const isLastPiece = currentI >= pieces.length - 1;
+      const generatedKey = currentKey === '[]'
+        ? `[+${String(Math.random()).slice(2, 12)}]`
+        : currentKey;
+      const newKey = isLockedPath 
+        ? getOptions(generatedKey, parent).realKey 
+        : generatedKey;
+
+      const isLockedCurrent = !isLockedPath 
+        && parent.hasOwnProperty(newKey) 
+        && checkIsLocked(parent[newKey]);
+
+      isLockedPath = isLockedPath || isLockedCurrent;
+
+      if (isLastPiece) {
+        const newValue = pairValue(PAIR, isLockedPath);
+        if (isLockedPath) setValue(parent, newKey, newValue);
+        else parent[newKey] = newValue;
+        return FULL_RESULT;
       }
 
-      const isMutateCur = R[cur] instanceof XMutateNewElementX;
-      if (!isMutatedObj && isMutateCur) {
-        isMutatedObj = true;
+      const currentValue = (
+        isLockedCurrent 
+          ? parent[newKey].__value__ 
+          : parent[newKey]
+      );
+
+      if (!(currentValue instanceof Object)) {
+        // if (!!currentValue) {
+        //   console.warn(`Warning: In "${PAIR[0]}", bad value for "${currentKey}", it will be replaced by empty Object ({})`);
+        // }
+        const newValue = {};
+        if (isLockedPath) setValue(parent, newKey, newValue);
+        else parent[newKey] = newValue;
+        return newValue;
       }
 
-      let newValue = isMutateCur ? R[cur].__value__ : R[cur];
-      if (curI + 1 >= pieces.length) newValue = pairValue(PAIR, isMutatedObj);
-      else {
-        if (!newValue) newValue = {};
-        else if (!(newValue instanceof Object)) {
-          // console.warn(`Warning: In "${key}", bad path for "${cur}", it replaced on empty Object ({})`);
-          newValue = {};
-        }
-      }
-
-      if (isMutateCur) R[cur].__value__ = newValue;
-      else R[cur] = newValue;
-
-      return newValue;
+      return currentValue;
     }, FULL_RESULT);
     return FULL_RESULT;
   }, {});
@@ -105,27 +141,48 @@ function updateSection(point, tree) {
     typeof (tree) !== 'object'
   ) return tree;
 
-  if (tree instanceof XMutateNewElementX) return tree.__value__;
+  if (checkIsLocked(tree)) return tree.__value__;
 
-  const ARR_REG = new RegExp('^\\[([^\\[\\].]*)\\]$');
   const pieces = Object.keys(tree).map(k => k.trim());
-  const needArray = pieces.some(p => !!ARR_REG.exec(p));
+  const needArray = pieces.some(p => !!ARRAY_REGEXP.exec(p));
   const result = mutateObj(point, needArray ? mutateTypes.array : mutateTypes.object);
 
   pieces.forEach(key => {
-    const isArray = ARR_REG.exec(key);
-    let k = key;
-    if (isArray) {
-      k = isArray[1].trim();
-      if (k === '' || k.slice(0,1) === '+') k = result.length;
-    }
+    const opt = getOptions(key, result);
+    const k = opt.realKey;
     if (tree[key] instanceof XMutateRemovedElementX) {
-      if (isArray) result.splice(k, 1);
+      if (opt.isArray) result.splice(k, 1);
       else delete result[k];
+      // setValue(result, k, tree[key]);
     } else {
       result[k] = updateSection(result[k], tree[key]);
     }
   });
+  return result;
+}
+/* ############################################################################# */
+export function getOptions(key, parentValue) {
+  const realParentValue = checkIsLocked(parentValue)
+    ? parentValue.__value__
+    : parentValue;
+  const parse = ARRAY_REGEXP.exec(key);
+  const result = {
+    key,
+    realKey: key,
+    isArray: !!parse,
+    length: Array.isArray(realParentValue) ? realParentValue.length : 0
+  };
+  
+  if (parse) {
+    const k = parse[1].trim();
+    result.key = k;
+    if (k === '' || k.slice(0,1) === '+') {
+      result.realKey = result.length;
+    } else {
+      result.realKey = parseInt(k, 10) || 0;
+    }
+  }
+
   return result;
 }
 /* ############################################################################# */
@@ -134,8 +191,7 @@ export default function mutate(pObj, pExt) {
     throw new Error('Type of variable shoud be Object or Array');
   }
   const tree = extToTree(pExt);
-  const newObj = updateSection(pObj, tree);
-  return newObj;
+  return updateSection(pObj, tree);
 }
 /* ############################################################################# */
 
