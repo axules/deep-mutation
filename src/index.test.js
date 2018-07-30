@@ -23,7 +23,7 @@ const simpleArraysData = [
   [{ a: 10 }, [['a.aa.aaa', 5], ['a.aa.aaa.aaaa', 2]], { a: { aa: { aaa: { aaaa: 2 } } } }],
   [{ a: 10 }, [['a.aa', 5], ['a.aa2', 2]], { a: { aa: 5, aa2: 2 } }],
   [{ a: 10 }, [['a.aa', 5], ['b.bb', 2]], { a: { aa: 5 }, b: { bb: 2 } }],
-  // extend array
+  // // extend array
   [[], [['[]', 5]], [5]],
   [{ a: [] }, [['a.[]', 5]], { a: [5] }],
   [{ a: [] }, [['a.[0]', 5]], { a: [5] }],
@@ -35,7 +35,7 @@ const simpleArraysData = [
   [{ a: [1] }, [['a.[]', 5],['a.[]', 7]], { a: [1, 5, 7] }],
   [{ a: [1] }, [['a.[0]', 5]], { a: [5] }],
   [{ a: [1] }, [['a.[0]']], { a: [] }],
-  // changes are object
+  // // changes are object
   [{ a: [] }, { 'a.[]': 5 }, { a: [5] }],
   [{ a: [] }, { 'a.[0]': 5 }, { a: [5] }],
   [{ a: [] }, { 'a.[2]': 5 }, { a: [undefined, undefined, 5] }],
@@ -44,10 +44,31 @@ const simpleArraysData = [
   [{ a: { aa: 10 } }, { 'a.aa': 5 }, { a: { aa: 5 } }],
   [{ a: { aa: 10 } }, { 'a.aa': undefined, 'a.aaa': 99 }, { a: { aaa: 99 } }],
   // set object, extend object
-  [{ a: 10 }, [['a', { aa: 5 }]], { a: { aa: 5 } }],
+  [{ }, [['a', { aa: 5 }]], { a: { aa: 5 } }],
   [{ a: 10 }, [['a', { aa: { aaa: 5 } }]], { a: { aa: { aaa: 5 } } }],
   [{ a: 10 }, [['a', { aa: { aaa: 5 } }], ['a.aa.aaa2', 1]], { a: { aa: { aaa: 5, aaa2: 1 } } }],
   [{ a: 10 }, [['a', { aa: { aaa: 5, aaa2: 1 } }], ['a.aa.aaa2']], { a: { aa: { aaa: 5 } } }],
+  [{ a: 10 }, [['a', { aa: 5 }], ['a', [1,2,3]]], { a: [1,2,3] }],
+  [{ a: 10 }, [['a', { aa: 5 }], ['a.aa', 12]], { a: { aa: 12 } }],
+  [{ b: 20 }, [['a', { aa: 5 }], ['a']], { b: 20 }],
+  [{ b: 20 }, [['a', { aa: 5 }], ['a.aa']], { a: { }, b: 20 }],
+  // complex changes
+  [{ a: 10, b: [], c: {} }, { a: 50, b: { b1: 10 }, c: [1,2,3] }, { a: 50, b: { b1: 10 }, c: [1,2,3] }],
+  [
+    { a: 10, b: [], c: {}, d: { d1: 12 }, e: [9,8,7] }, 
+    { a: 50, b: { b1: 10 }, c: [1,2,3], 'c.[]': { cc: 22 }, 'b.b2': 17, 'd.d2': 15, 'e.[0]': 1, 'e.[]': 3 },
+    { a: 50, b: { b1: 10, b2: 17 }, c: [1,2,3, { cc: 22 }], d: { d1: 12, d2: 15 }, e: [1,8,7,3] }
+  ],
+  [
+    { a: { a1: { a1_1: 22 } }, b: [{ b1: 10 }], c: [{ c1: 1 }] }, 
+    { 'a.a1.a1_1': 33, 'a.a1.a1_2': 9, 'a.a2': 14, 'b.[0].b1': 11, 'b.[]': 15, 'b.[0].b2': null, 'c[0].c1': undefined, 'c[0]': 7 },
+    { a: { a1: { a1_1: 33, a1_2: 9 }, a2: 14 }, b: [{ b1: 11, b2: null }, 15], c: [7] }
+  ],
+  [
+    { a: 10, b: 20 }, 
+    { a: { a1: 1, a2: 2 }, 'a.a3.a3_1': 20, b: [1,2,3,{ b1: 1 }], 'b.[]': 11, 'b[3].b2.b2_1.b2_1_1': 'b2_1_1 value', 'c.[]': 14 },
+    { a: { a1: 1, a2: 2, a3: { a3_1: 20 } }, b: [1,2,3,{ b1: 1, b2: { b2_1: { b2_1_1: 'b2_1_1 value' } } }, 11], c: [14] }
+  ],
 ];
 
 describe('mutate: ', () => {
@@ -114,5 +135,79 @@ describe('mutate: ', () => {
     expect(result.c.cc).toBe(obj.c.cc);
     expect(result.c.cc2).not.toBe(obj.c.cc2);
     expect(result.c.cc.ccc).toBe(obj.c.cc.ccc);
+  });
+
+  test('should set object value', () => {
+    function MyParentClass() {}
+    MyParentClass.prototype.myFunc = () => 10;
+    function MyClass() {}
+    MyClass.prototype = Object.create(MyParentClass.prototype);
+
+    const obj = { };
+    const itArray = [1,2,3];
+    const itMyObject = new MyClass();
+
+    const itObject = { b1: 1, b2: 2 };
+    const changes = [
+      ['a.a1', itArray],
+      ['a.a2', itMyObject],
+      ['b', itObject]
+    ];
+    const resut = mutate(obj, changes);
+
+    expect(resut.a.a1).toBe(itArray);
+    expect(resut.a.a2).toBe(itMyObject);
+    expect(resut.a.a2.myFunc).not.toBe(undefined);
+    expect(resut.a.a2.myFunc()).toBe(10);
+    expect(resut.b).toBe(itObject);
+  });
+
+  test('should replace by object value', () => {
+    const obj = { b: { b5: 5, b6: 6 } };
+    const changes = {
+      b: { b1: 1, b2: 2, b3: 3 }
+    };
+    const resut = mutate(obj, changes);
+
+    expect(resut.b).toEqual(changes.b);
+    expect(resut.b).toBe(changes.b);
+  });
+
+  test('should replace by array value', () => {
+    const obj = { b: [5,6] };
+    const changes = {
+      b: [1,2,3]
+    };
+    const resut = mutate(obj, changes);
+
+    expect(resut.b).toEqual(changes.b);
+    expect(resut.b).toBe(changes.b);
+  });
+
+  test('should change object value', () => {
+    const obj = { b: [] };
+    const changes = {
+      b: { b1: 1, b2: 2, b3: 3 },
+      'b.b4': 4
+    };
+    const resut = mutate(obj, changes);
+
+    expect(resut.b).toEqual(changes.b);
+    expect(resut.b).toBe(changes.b);
+
+    expect(changes.b).toEqual({ b1: 1, b2: 2, b3: 3, b4: 4 });
+  });
+
+  test('should change array value', () => {
+    const obj = { b: [5,6] };
+    const changes = {
+      b: [1,2,3],
+      'b.[]': 4
+    };
+    const resut = mutate(obj, changes);
+
+    expect(resut.b).toEqual(changes.b);
+    expect(resut.b).toBe(changes.b);
+    expect(changes.b).toEqual([1,2,3,4]);
   });
 });
