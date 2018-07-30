@@ -34,14 +34,27 @@
   "scripts": {
     "test": "jest"
   },
+  "jest": {
+    "runner": "jest-runner-eslint",
+    "displayName": "lint",
+    "testMatch": [
+      "<rootDir>/src/**/*.js"
+    ]
+  },
   "devDependencies": {
-    "jest": "^23.4.1",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.6",
     "babel-jest": "^23.4.0",
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-0": "^6.24.1"
+    "babel-preset-stage-0": "^6.24.1",
+    "eslint": "^5.2.0",
+    "eslint-loader": "^2.1.0",
+    "eslint-plugin-babel": "^5.1.0",
+    "eslint-plugin-flowtype": "^2.50.0",
+    "eslint-plugin-import": "^2.13.0",
+    "jest": "^23.4.1",
+    "jest-runner-eslint": "^0.6.0"
   },
   "files": [
     "src"
