@@ -10,7 +10,7 @@ It is simple function which get object and list of changes and returns new patch
 npm install --save deep-mutation
 ```
 
-## How it works?
+# How it works?
 
 ### It will be equal
 ```javascript
@@ -42,16 +42,17 @@ const myObject = {
     d: []
 };
 
-const changes = {
-    'a': 111,
-    'b.b1': 222,
-    'b.b2': 'text',
-    'c.c1': 20,
-    'c.c2': undefined,
-    'd.[]': 10,
-    'd.[]': 20,
-    'e': [1,2,3]
-};
+const changes = [
+    ['a', 111],
+    ['b.b1', 222],
+    ['b.b2', 'text'],
+    ['c.c1', 20],
+    ['c.c2'],
+    ['d.[]', 10],
+    ['d.[]', 20],
+    ['e', [1,2,3]]
+];
+
 const result = mutate(myObject, changes);
 ```
 
@@ -71,11 +72,10 @@ const result = mutate(myObject, changes);
 }
 ```
 
-### Changes can be array of arrays
+### Changes can be array of arrays or object where each key is path
 
 ```javascript
-// ...
-
+// array of arrays
 const changes = [
     ['a', 111],
     ['b.b1', 222],
@@ -86,60 +86,173 @@ const changes = [
     ['d.[]', 20],
     ['e', [1,2,3]]
 ];
-
-// ...
 ```
 
-## Tests cases
+OR
 
 ```javascript
-mutate([{ a: 10 }, [['a', 5]]); // { a: 5 }];
-mutate([{ a: 10 }, [['b', 5]]); // { a: 10, b: 5 }];
-mutate([{}, [['a', 10]), ['b', 5]]); // { a: 10, b: 5 }];
-mutate([{ a: 10 }, [['a']]); // { }];
-mutate([{ a: 10 }, [null]); // { a: 10 }];
-mutate([{ a: 10 }, [['a']); // ['b']]); // { }];
-mutate([{ a: 10 }, ['a', 'b']); // { }];
-mutate([{ a: 10 }, [['a']); // ['b', 5]]); // { b: 5 }];
-mutate([{ a: 10 }, [['a', [1,2,3]]]); // { a: [1,2,3] }];
-mutate([{ a: 10 }, [['a', { aa: 1 }]]); // { a: { aa: 1 } }];
-mutate([{ a: 10 }, [['a', 5], ['b', { bb: 2 }]]); // { a: 5, b: { bb: 2 } }];
+// object
+const changes = {
+    'a': 111,
+    'b.b1': 222,
+    'b.b2': 'text',
+    'c.c1': 20,
+    'c.c2': undefined,
+    'd.[+123412]': 10,
+    'd.[+544555]': 20,
+    'e': [1,2,3]
+};
+```
+
+If key for array item begins from `+` (\`[+${randomNumber}]\`), then value will be append to end of array.
+```javascript
+...
+    'a.[+123312312]': 100
+...
+// will be equal
+...
+    'a.[]': 100
+...
+```
+
+# Tests cases
+
+```javascript
+mutate({ a: 10 }, [['a', 5]]); // { a: 5 }];
+mutate({ a: 10 }, [['b', 5]]); // { a: 10, b: 5 }];
+mutate({}, [['a', 10]), ['b', 5]]); // { a: 10, b: 5 }];
+mutate({ a: 10 }, [['a']]); // { }];
+mutate({ a: 10 }, [null]); // { a: 10 }];
+mutate({ a: 10 }, [['a']); // ['b']]); // { }];
+mutate({ a: 10 }, ['a', 'b']); // { }];
+mutate({ a: 10 }, [['a']); // ['b', 5]]); // { b: 5 }];
+mutate({ a: 10 }, [['a', [1,2,3]]]); // { a: [1,2,3] }];
+mutate({ a: 10 }, [['a', { aa: 1 }]]); // { a: { aa: 1 } }];
+mutate({ a: 10 }, [['a', 5], ['b', { bb: 2 }]]); // { a: 5, b: { bb: 2 } }];
 // extend object
-mutate([{ a: { aa: 10 } }, [['a.aa', 5]]); // { a: { aa: 5 } }];
-mutate([{ a: { aa: 10 } }, [['a.aa']]); // { a: { } }];
-mutate([{ a: { aa: 10 } }, [['a.aa.[]', 1]]); // { a: { aa: [1] } }];
-mutate([{ a: { aa: 10 } }, [['a.aa'], ['a']]); // { }];
-mutate([{ a: { aa: 10 } }, ['a.aa', 'a']); // { }];
-mutate([{ a: 10 }, [['a.aa', 5]]); // { a: { aa: 5 } }];
-mutate([{ a: 10 }, [['a.aa.aaa', 5]]); // { a: { aa: { aaa: 5 } } }];
-mutate([{ a: 10 }, [['a.aa.aaa', 5], ['a.aa.aaa.aaaa', 2]]); // { a: { aa: { aaa: { aaaa: 2 } } } }];
-mutate([{ a: 10 }, [['a.aa', 5], ['a.aa2', 2]]); // { a: { aa: 5, aa2: 2 } }];
-mutate([{ a: 10 }, [['a.aa', 5], ['b.bb', 2]]); // { a: { aa: 5 }, b: { bb: 2 } }];
+mutate({ a: { aa: 10 } }, [['a.aa', 5]]); // { a: { aa: 5 } }];
+mutate({ a: { aa: 10 } }, [['a.aa']]); // { a: { } }];
+mutate({ a: { aa: 10 } }, [['a.aa.[]', 1]]); // { a: { aa: [1] } }];
+mutate({ a: { aa: 10 } }, [['a.aa'], ['a']]); // { }];
+mutate({ a: { aa: 10 } }, ['a.aa', 'a']); // { }];
+mutate({ a: 10 }, [['a.aa', 5]]); // { a: { aa: 5 } }];
+mutate({ a: 10 }, [['a.aa.aaa', 5]]); // { a: { aa: { aaa: 5 } } }];
+mutate({ a: 10 }, [['a.aa.aaa', 5], ['a.aa.aaa.aaaa', 2]]); // { a: { aa: { aaa: { aaaa: 2 } } } }];
+mutate({ a: 10 }, [['a.aa', 5], ['a.aa2', 2]]); // { a: { aa: 5, aa2: 2 } }];
+mutate({ a: 10 }, [['a.aa', 5], ['b.bb', 2]]); // { a: { aa: 5 }, b: { bb: 2 } }];
 // extend array
-mutate([[], [['[]', 5]]); // [5]];
-mutate([{ a: [] }, [['a.[]', 5]]); // { a: [5] }];
-mutate([{ a: [] }, [['a.[0]', 5]]); // { a: [5] }];
-mutate([{ a: [] }, [['a[0]', 5]]); // { a: [5] }];
-mutate([{ a: [] }, [['a[][]', 5]]); // { a: [[5]] }];
-mutate([{ a: [] }, [['a.[].[]', 5]]); // { a: [[5]] }];
-mutate([{ a: [] }, [['a.[2]', 5]]); // { a: [undefined, undefined, 5] }];
-mutate([{ a: [1] }, [['a.[]', 5]]); // { a: [1, 5] }];
-mutate([{ a: [1] }, [['a.[]', 5],['a.[]', 7]]); // { a: [1, 5, 7] }];
-mutate([{ a: [1] }, [['a.[0]', 5]]); // { a: [5] }];
-mutate([{ a: [1] }, [['a.[0]']]); // { a: [] }];
+mutate([], [['[]', 5]]); // [5]];
+mutate({ a: [] }, [['a.[]', 5]]); // { a: [5] }];
+mutate({ a: [] }, [['a.[0]', 5]]); // { a: [5] }];
+mutate({ a: [] }, [['a[0]', 5]]); // { a: [5] }];
+mutate({ a: [] }, [['a[][]', 5]]); // { a: [[5]] }];
+mutate({ a: [] }, [['a.[].[]', 5]]); // { a: [[5]] }];
+mutate({ a: [] }, [['a.[2]', 5]]); // { a: [undefined, undefined, 5] }];
+mutate({ a: [1] }, [['a.[]', 5]]); // { a: [1, 5] }];
+mutate({ a: [1] }, [['a.[]', 5],['a.[]', 7]]); // { a: [1, 5, 7] }];
+mutate({ a: [1] }, [['a.[0]', 5]]); // { a: [5] }];
+mutate({ a: [1] }, [['a.[0]']]); // { a: [] }];
 // changes are object
-mutate([{ a: [] }, { 'a.[]': 5 }); // { a: [5] }];
-mutate([{ a: [] }, { 'a.[0]': 5 }); // { a: [5] }];
-mutate([{ a: [] }, { 'a.[2]': 5 }); // { a: [undefined, undefined, 5] }];
-mutate([{ a: [1] }, { 'a.[]': 5 }); // { a: [1, 5] }];
-mutate([{ a: [1] }, { 'a.[0]': 5 }); // { a: [5] }];
-mutate([{ a: { aa: 10 } }, { 'a.aa': 5 }); // { a: { aa: 5 } }];
-mutate([{ a: { aa: 10 } }, { 'a.aa': undefined, 'a.aaa': 99 }); // { a: { aaa: 99 } }];
+mutate({ a: [] }, { 'a.[]': 5 }); // { a: [5] }];
+mutate({ a: [] }, { 'a.[0]': 5 }); // { a: [5] }];
+mutate({ a: [] }, { 'a.[2]': 5 }); // { a: [undefined, undefined, 5] }];
+mutate({ a: [1] }, { 'a.[]': 5 }); // { a: [1, 5] }];
+mutate({ a: [1] }, { 'a.[0]': 5 }); // { a: [5] }];
+mutate({ a: { aa: 10 } }, { 'a.aa': 5 }); // { a: { aa: 5 } }];
+mutate({ a: { aa: 10 } }, { 'a.aa': undefined, 'a.aaa': 99 }); // { a: { aaa: 99 } }];
 // set object, extend object
-mutate([{ a: 10 }, [['a', { aa: 5 }]]); // { a: { aa: 5 } }];
-mutate([{ a: 10 }, [['a', { aa: { aaa: 5 } }]]); // { a: { aa: { aaa: 5 } } }];
-mutate([{ a: 10 }, [['a', { aa: { aaa: 5 } }], ['a.aa.aaa2', 1]]); // { a: { aa: { aaa: 5, aaa2: 1 } } }];
-mutate([{ a: 10 }, [['a', { aa: { aaa: 5, aaa2: 1 } }], ['a.aa.aaa2']]); // { a: { aa: { aaa: 5 } } }];
+mutate({ }, [['a', { aa: 5 }]]) // { a: { aa: 5 } }
+mutate({ a: 10 }, [['a', { aa: 5 }]]); // { a: { aa: 5 } }];
+mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }]]) // { a: { aa: { aaa: 5 } } }
+mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }]]); // { a: { aa: { aaa: 5 } } }];
+mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }], ['a.aa.aaa2', 1]]); // { a: { aa: { aaa: 5, aaa2: 1 } } }];
+mutate({ a: 10 }, [['a', { aa: { aaa: 5, aaa2: 1 } }], ['a.aa.aaa2']]); // { a: { aa: { aaa: 5 } } }];
+mutate({ a: 10 }, [['a', { aa: 5 }], ['a', [1,2,3]]]) // { a: [1,2,3] }
+mutate({ a: 10 }, [['a', { aa: 5 }], ['a.aa', 12]]) // { a: { aa: 12 } }
+mutate({ b: 20 }, [['a', { aa: 5 }], ['a']]) // { b: 20 }
+mutate({ b: 20 }, [['a', { aa: 5 }], ['a.aa']]) // { a: { }, b: 20 }
+```
+### Complex changes tests
+```javascript
+mutate({ a: 10, b: [], c: {} }, { a: 50, b: { b1: 10 }, c: [1,2,3] }) 
+// { a: 50, b: { b1: 10 }, c: [1,2,3] }
+
+mutate(
+    { a: 10, b: [], c: {}, d: { d1: 12 }, e: [9,8,7] }, 
+    { 
+        a: 50, 
+        b: { b1: 10 }, 
+        c: [1,2,3], 
+        'c.[]': { cc: 22 }, 
+        'b.b2': 17, 
+        'd.d2': 15, 
+        'e.[0]': 1, 
+        'e.[]': 3 
+    }
+)
+/*
+{ 
+    a: 50, 
+    b: { b1: 10, b2: 17 }, 
+    c: [1,2,3, { cc: 22 }], 
+    d: { d1: 12, d2: 15 }, 
+    e: [1,8,7,3] 
+}
+*/
+
+mutate(
+    { a: { a1: { a1_1: 22 } }, b: [{ b1: 10 }], c: [{ c1: 1 }] }, 
+    { 
+        'a.a1.a1_1': 33, 
+        'a.a1.a1_2': 9,
+        'a.a2': 14,
+        'b.[0].b1': 11,
+        'b.[]': 15,
+        'b.[0].b2': null,
+        'c[0].c1': undefined,
+        'c[0]': 7
+    }
+)
+/*
+{ 
+    a: { 
+        a1: { a1_1: 33, a1_2: 9 },
+        a2: 14
+    },
+    b: [{ b1: 11, b2: null }, 15], 
+    c: [7] 
+}
+*/
+
+mutate(
+    { a: 10, b: 20 }, 
+    { 
+        a: { a1: 1, a2: 2 }, 
+        'a.a3.a3_1': 20, b: [1,2,3,{ b1: 1 }], 
+        'b.[]': 11, 
+        'b[3].b2.b2_1.b2_1_1': 'b2_1_1 value', 
+        'c.[]': 14 
+    }
+)
+/*
+{ 
+    a: { 
+        a1: 1, 
+        a2: 2, 
+        a3: { a3_1: 20 } 
+    }, 
+    b: [
+        1,2,3,{ 
+            b1: 1, 
+            b2: { 
+                b2_1: { b2_1_1: 'b2_1_1 value' }
+            }
+        }, 
+        11
+    ], 
+    c: [14] 
+}
+*/
 ```
 
 ### It returns new object always
@@ -173,9 +286,42 @@ expect(result.c.cc2).not.toBe(obj.c.cc2);
 expect(result.c.cc.ccc).toBe(obj.c.cc.ccc);
 ```
 
-## When can it be used?
+# (!!!) Attention! Важно! Achtung!
+If you use `Object` (or `Array`) as change and change it in next changes rules, then this `Object` (or `Array`) will be changed.
+### Test cases
+```javascript
+test('should change object value', () => {
+    const obj = { b: [] };
+    const patchObject = { b1: 1, b2: 2, b3: 3 };
+    const changes = [
+      ['b', patchObject],
+      ['b.b4', 4]
+    ];
+    const resut = mutate(obj, changes);
 
-### In redux
+    expect(resut.b).toEqual(patchObject);
+    expect(resut.b).toBe(patchObject);
+    expect(patchObject).toEqual({ b1: 1, b2: 2, b3: 3, b4: 4 });
+});
+
+test('should change array value', () => {
+    const obj = { b: [5,6] };
+    const patchArray = [1,2,3];
+    const changes = [
+      ['b', patchArray],
+      ['b.[]', 4]
+    ];
+    const resut = mutate(obj, changes);
+
+    expect(resut.b).toEqual(patchArray);
+    expect(resut.b).toBe(patchArray);
+    expect(patchArray).toEqual([1,2,3,4]);
+});
+```
+
+# When can it be used?
+
+## In redux
 ```javascript
 import mutate from 'deep-mutation';
 
@@ -209,7 +355,7 @@ export default (state = {}, action) => {
 // ...
 ```
 
-### In component state
+## In component state
 ```javascript
 import mutate from 'deep-mutation';
 
