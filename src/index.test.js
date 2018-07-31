@@ -23,7 +23,7 @@ const simpleArraysData = [
   [{ a: 10 }, [['a.aa.aaa', 5], ['a.aa.aaa.aaaa', 2]], { a: { aa: { aaa: { aaaa: 2 } } } }],
   [{ a: 10 }, [['a.aa', 5], ['a.aa2', 2]], { a: { aa: 5, aa2: 2 } }],
   [{ a: 10 }, [['a.aa', 5], ['b.bb', 2]], { a: { aa: 5 }, b: { bb: 2 } }],
-  // // extend array
+  // extend array
   [[], [['[]', 5]], [5]],
   [{ a: [] }, [['a.[]', 5]], { a: [5] }],
   [{ a: [] }, [['a.[0]', 5]], { a: [5] }],
@@ -35,7 +35,7 @@ const simpleArraysData = [
   [{ a: [1] }, [['a.[]', 5],['a.[]', 7]], { a: [1, 5, 7] }],
   [{ a: [1] }, [['a.[0]', 5]], { a: [5] }],
   [{ a: [1] }, [['a.[0]']], { a: [] }],
-  // // changes are object
+  // changes are object
   [{ a: [] }, { 'a.[]': 5 }, { a: [5] }],
   [{ a: [] }, { 'a.[0]': 5 }, { a: [5] }],
   [{ a: [] }, { 'a.[2]': 5 }, { a: [undefined, undefined, 5] }],
@@ -52,6 +52,7 @@ const simpleArraysData = [
   [{ a: 10 }, [['a', { aa: 5 }], ['a.aa', 12]], { a: { aa: 12 } }],
   [{ b: 20 }, [['a', { aa: 5 }], ['a']], { b: 20 }],
   [{ b: 20 }, [['a', { aa: 5 }], ['a.aa']], { a: { }, b: 20 }],
+  [{ }, [['a.a1', 200], ['a', { a2: 100 }]], { a: { a2: 100 } }],
   // complex changes
   [{ a: 10, b: [], c: {} }, { a: 50, b: { b1: 10 }, c: [1,2,3] }, { a: 50, b: { b1: 10 }, c: [1,2,3] }],
   [
@@ -68,7 +69,7 @@ const simpleArraysData = [
     { a: 10, b: 20 }, 
     { a: { a1: 1, a2: 2 }, 'a.a3.a3_1': 20, b: [1,2,3,{ b1: 1 }], 'b.[]': 11, 'b[3].b2.b2_1.b2_1_1': 'b2_1_1 value', 'c.[]': 14 },
     { a: { a1: 1, a2: 2, a3: { a3_1: 20 } }, b: [1,2,3,{ b1: 1, b2: { b2_1: { b2_1_1: 'b2_1_1 value' } } }, 11], c: [14] }
-  ],
+  ]
 ];
 
 describe('mutate: ', () => {
@@ -153,13 +154,13 @@ describe('mutate: ', () => {
       ['a.a2', itMyObject],
       ['b', itObject]
     ];
-    const resut = mutate(obj, changes);
+    const result = mutate(obj, changes);
 
-    expect(resut.a.a1).toBe(itArray);
-    expect(resut.a.a2).toBe(itMyObject);
-    expect(resut.a.a2.myFunc).not.toBe(undefined);
-    expect(resut.a.a2.myFunc()).toBe(10);
-    expect(resut.b).toBe(itObject);
+    expect(result.a.a1).toBe(itArray);
+    expect(result.a.a2).toBe(itMyObject);
+    expect(result.a.a2.myFunc).not.toBe(undefined);
+    expect(result.a.a2.myFunc()).toBe(10);
+    expect(result.b).toBe(itObject);
   });
 
   test('should replace by object value', () => {
@@ -167,10 +168,10 @@ describe('mutate: ', () => {
     const changes = {
       b: { b1: 1, b2: 2, b3: 3 }
     };
-    const resut = mutate(obj, changes);
+    const result = mutate(obj, changes);
 
-    expect(resut.b).toEqual(changes.b);
-    expect(resut.b).toBe(changes.b);
+    expect(result.b).toEqual(changes.b);
+    expect(result.b).toBe(changes.b);
   });
 
   test('should replace by array value', () => {
@@ -178,36 +179,76 @@ describe('mutate: ', () => {
     const changes = {
       b: [1,2,3]
     };
-    const resut = mutate(obj, changes);
+    const result = mutate(obj, changes);
 
-    expect(resut.b).toEqual(changes.b);
-    expect(resut.b).toBe(changes.b);
+    expect(result.b).toEqual(changes.b);
+    expect(result.b).toBe(changes.b);
   });
 
   test('should change object value', () => {
     const obj = { b: [] };
-    const changes = {
-      b: { b1: 1, b2: 2, b3: 3 },
-      'b.b4': 4
-    };
-    const resut = mutate(obj, changes);
+    const patchObject = { b1: 1, b2: 2, b3: 3 };
+    const changes = [
+      ['b', patchObject],
+      ['b.b4', 4]
+    ];
+    const result = mutate(obj, changes);
 
-    expect(resut.b).toEqual(changes.b);
-    expect(resut.b).toBe(changes.b);
-
-    expect(changes.b).toEqual({ b1: 1, b2: 2, b3: 3, b4: 4 });
+    expect(result.b).toEqual(patchObject);
+    expect(result.b).toBe(patchObject);
+    expect(patchObject).toEqual({ b1: 1, b2: 2, b3: 3, b4: 4 });
   });
 
   test('should change array value', () => {
     const obj = { b: [5,6] };
-    const changes = {
-      b: [1,2,3],
-      'b.[]': 4
-    };
-    const resut = mutate(obj, changes);
+    const patchArray = [1,2,3];
+    const changes = [
+      ['b', patchArray],
+      ['b.[]', 4]
+    ];
+    const result = mutate(obj, changes);
 
-    expect(resut.b).toEqual(changes.b);
-    expect(resut.b).toBe(changes.b);
-    expect(changes.b).toEqual([1,2,3,4]);
+    expect(result.b).toEqual(patchArray);
+    expect(result.b).toBe(patchArray);
+    expect(patchArray).toEqual([1,2,3,4]);
+  });
+  
+  test('should returns equal results for Array and Object changes', () => {
+    const obj = {
+      a: 100,
+      b: 200,
+      c: {
+        c1: 1,
+        c2: 2
+      },
+      d: []
+    };
+      
+    const arrayChanges = [
+      ['a', 111],
+      ['b.b1', 222],
+      ['b.b2', 'text'],
+      ['c.c1', 20],
+      ['c.c2'],
+      ['d.[]', 10],
+      ['d.[]', 20],
+      ['e', [1,2,3]]
+    ];
+
+    const objectChanges = {
+      'a': 111,
+      'b.b1': 222,
+      'b.b2': 'text',
+      'c.c1': 20,
+      'c.c2': undefined,
+      'd.[+123434]': 10,
+      'd.[+554542]': 20,
+      'e': [1,2,3]
+    };
+      
+    const result1 = mutate(obj, arrayChanges);
+    const result2 = mutate(obj, objectChanges);
+
+    expect(result1).toEqual(result2);
   });
 });
