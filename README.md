@@ -28,7 +28,7 @@ const result = {
 // equal with mutate
 const resultMutate = mutate(obj, { 'c.c3.c32': 25 });
 ```
-
+### Simple example
 ```javascript
 import mutate from 'deep-mutation';
 
