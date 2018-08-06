@@ -1,4 +1,4 @@
-# deep-mutatation
+# deep-mutation
 
 ## What is it?
 
@@ -56,7 +56,7 @@ const changes = [
 const result = mutate(myObject, changes);
 ```
 
-### Result will be
+#### Result will be
 ```
 {
     a: 111,
