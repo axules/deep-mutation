@@ -118,55 +118,62 @@ If key for array item begins from `+` (\`[+${randomNumber}]\`), then value will 
 # Tests cases
 
 ```javascript
-mutate({ a: 10 }, [['a', 5]]); // { a: 5 }];
-mutate({ a: 10 }, [['b', 5]]); // { a: 10, b: 5 }];
-mutate({}, [['a', 10]), ['b', 5]]); // { a: 10, b: 5 }];
-mutate({ a: 10 }, [['a']]); // { }];
-mutate({ a: 10 }, [null]); // { a: 10 }];
-mutate({ a: 10 }, [['a']); // ['b']]); // { }];
-mutate({ a: 10 }, ['a', 'b']); // { }];
-mutate({ a: 10 }, [['a']); // ['b', 5]]); // { b: 5 }];
-mutate({ a: 10 }, [['a', [1,2,3]]]); // { a: [1,2,3] }];
-mutate({ a: 10 }, [['a', { aa: 1 }]]); // { a: { aa: 1 } }];
-mutate({ a: 10 }, [['a', 5], ['b', { bb: 2 }]]); // { a: 5, b: { bb: 2 } }];
+mutate({ a: 10 }, [['a', 5]]); // { a: 5 }
+mutate({ a: 10 }, [['b', 5]]); // { a: 10, b: 5 }
+mutate({}, [['a', 10]), ['b', 5]]); // { a: 10, b: 5 }
+mutate({ a: 10 }, [['a']]); // { }
+mutate({ a: 10 }, [null]); // { a: 10 }
+mutate({ a: 10 }, [['a']); // ['b']]); // { }
+mutate({ a: 10 }, ['a', 'b']); // { }
+mutate({ a: 10 }, [['a']); // ['b', 5]]); // { b: 5 }
+mutate({ a: 10 }, [['a', [1,2,3]]]); // { a: [1,2,3] }
+mutate({ a: 10 }, [['a', { aa: 1 }]]); // { a: { aa: 1 } }
+mutate({ a: 10 }, [['a', 5], ['b', { bb: 2 }]]); // { a: 5, b: { bb: 2 } }
 // extend object
-mutate({ a: { aa: 10 } }, [['a.aa', 5]]); // { a: { aa: 5 } }];
-mutate({ a: { aa: 10 } }, [['a.aa']]); // { a: { } }];
-mutate({ a: { aa: 10 } }, [['a.aa.[]', 1]]); // { a: { aa: [1] } }];
-mutate({ a: { aa: 10 } }, [['a.aa'], ['a']]); // { }];
-mutate({ a: { aa: 10 } }, ['a.aa', 'a']); // { }];
-mutate({ a: 10 }, [['a.aa', 5]]); // { a: { aa: 5 } }];
-mutate({ a: 10 }, [['a.aa.aaa', 5]]); // { a: { aa: { aaa: 5 } } }];
-mutate({ a: 10 }, [['a.aa.aaa', 5], ['a.aa.aaa.aaaa', 2]]); // { a: { aa: { aaa: { aaaa: 2 } } } }];
-mutate({ a: 10 }, [['a.aa', 5], ['a.aa2', 2]]); // { a: { aa: 5, aa2: 2 } }];
-mutate({ a: 10 }, [['a.aa', 5], ['b.bb', 2]]); // { a: { aa: 5 }, b: { bb: 2 } }];
+mutate({ a: { aa: 10 } }, [['a.aa', 5]]); // { a: { aa: 5 } }
+mutate({ a: { aa: 10 } }, [['a.aa']]); // { a: { } }
+mutate({ a: { aa: { aaa: 10 } } }, [['a.aa'], ['a.aa.aaa']]) // { a: { } }
+mutate({ a: { aa: 10 } }, [['a.aa.[]', 1]]); // { a: { aa: [1] } }
+mutate({ a: { aa: 10 } }, [['a.aa'], ['a']]); // { }
+mutate({ a: { aa: 10 } }, ['a.aa', 'a']); // { }
+mutate({ a: 10 }, [['a.aa', 5]]); // { a: { aa: 5 } }
+mutate({ a: 10 }, [['a.aa.aaa', 5]]); // { a: { aa: { aaa: 5 } } }
+mutate({ a: 10 }, [['a.aa.aaa', 5], ['a.aa.aaa.aaaa', 2]]); // { a: { aa: { aaa: { aaaa: 2 } } } }
+mutate({ a: 10 }, [['a.aa', 5], ['a.aa2', 2]]); // { a: { aa: 5, aa2: 2 } }
+mutate({ a: 10 }, [['a.aa', 5], ['b.bb', 2]]); // { a: { aa: 5 }, b: { bb: 2 } }
 // extend array
-mutate([], [['[]', 5]]); // [5]];
-mutate({ a: [] }, [['a.[]', 5]]); // { a: [5] }];
-mutate({ a: [] }, [['a.[0]', 5]]); // { a: [5] }];
-mutate({ a: [] }, [['a[0]', 5]]); // { a: [5] }];
-mutate({ a: [] }, [['a[][]', 5]]); // { a: [[5]] }];
-mutate({ a: [] }, [['a.[].[]', 5]]); // { a: [[5]] }];
-mutate({ a: [] }, [['a.[2]', 5]]); // { a: [undefined, undefined, 5] }];
-mutate({ a: [1] }, [['a.[]', 5]]); // { a: [1, 5] }];
-mutate({ a: [1] }, [['a.[]', 5],['a.[]', 7]]); // { a: [1, 5, 7] }];
-mutate({ a: [1] }, [['a.[0]', 5]]); // { a: [5] }];
-mutate({ a: [1] }, [['a.[0]']]); // { a: [] }];
+mutate([], [['[]', 5]]); // [5]
+mutate({ a: [] }, [['a.[]', 5]]); // { a: [5] }
+mutate({ a: [] }, [['a.[0]', 5]]); // { a: [5] }
+mutate({ a: [] }, [['a[0]', 5]]); // { a: [5] }
+mutate({ a: [] }, [['a[][]', 5]]); // { a: [[5]] }
+mutate({ a: [] }, [['a.[].[]', 5]]); // { a: [[5]] }
+mutate({ a: [] }, [['a.[2]', 5]]); // { a: [undefined, undefined, 5] }
+mutate({ a: [1] }, [['a.[]', 5]]); // { a: [1, 5] }
+mutate({ a: [1] }, [['a.[]', 5],['a.[]', 7]]); // { a: [1, 5, 7] }
+mutate({ a: [1] }, [['a.[0]', 5]]); // { a: [5] }
+mutate({ a: [1] }, [['a.[0]']]); // { a: [] }
 // changes are object
-mutate({ a: [] }, { 'a.[]': 5 }); // { a: [5] }];
-mutate({ a: [] }, { 'a.[0]': 5 }); // { a: [5] }];
-mutate({ a: [] }, { 'a.[2]': 5 }); // { a: [undefined, undefined, 5] }];
-mutate({ a: [1] }, { 'a.[]': 5 }); // { a: [1, 5] }];
-mutate({ a: [1] }, { 'a.[0]': 5 }); // { a: [5] }];
-mutate({ a: { aa: 10 } }, { 'a.aa': 5 }); // { a: { aa: 5 } }];
-mutate({ a: { aa: 10 } }, { 'a.aa': undefined, 'a.aaa': 99 }); // { a: { aaa: 99 } }];
+mutate({ a: [] }, { 'a.[]': 5 }); // { a: [5] }
+mutate({ a: [] }, { 'a.[0]': 5 }); // { a: [5] }
+mutate({ a: [] }, { 'a.[2]': 5 }); // { a: [undefined, undefined, 5] }
+mutate({ a: [1] }, { 'a.[]': 5 }); // { a: [1, 5] }
+mutate({ a: [1] }, { 'a.[0]': 5 }); // { a: [5] }
+mutate({ a: { aa: 10 } }, { 'a.aa': 5 }); // { a: { aa: 5 } }
+mutate({ a: { aa: 10 } }, { 'a.aa': undefined, 'a.aaa': 99 }); // { a: { aaa: 99 } }
+mutate({ }, { 'a.aa.aaa': undefined }); // { }
+mutate({ }, [['a.aa.aaa']]); // { }
+mutate({ a: { 0: 'v0', 1: 'v1' } }, [['a.0']]); // { a: { 1: 'v1' } }
+mutate({ a: [1,2,3] }, [['a.[]']]); // { a: [1,2,3] }
+mutate({ a: [1,2,3] }, [['a.[0]']]); // { a: [2,3] }
+mutate({ a: [1,2,3] }, [['a.0']]); // { a: [undefined, 2,3] }
 // set object, extend object
 mutate({ }, [['a', { aa: 5 }]]) // { a: { aa: 5 } }
-mutate({ a: 10 }, [['a', { aa: 5 }]]); // { a: { aa: 5 } }];
+mutate({ a: 10 }, [['a', { aa: 5 }]]); // { a: { aa: 5 } }
 mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }]]) // { a: { aa: { aaa: 5 } } }
-mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }]]); // { a: { aa: { aaa: 5 } } }];
-mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }], ['a.aa.aaa2', 1]]); // { a: { aa: { aaa: 5, aaa2: 1 } } }];
-mutate({ a: 10 }, [['a', { aa: { aaa: 5, aaa2: 1 } }], ['a.aa.aaa2']]); // { a: { aa: { aaa: 5 } } }];
+mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }]]); // { a: { aa: { aaa: 5 } } }
+mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }], ['a.aa.aaa2', 1]]); // { a: { aa: { aaa: 5, aaa2: 1 } } }
+mutate({ a: 10 }, [['a', { aa: { aaa: 5, aaa2: 1 } }], ['a.aa.aaa2']]); // { a: { aa: { aaa: 5 } } }
 mutate({ a: 10 }, [['a', { aa: 5 }], ['a', [1,2,3]]]) // { a: [1,2,3] }
 mutate({ a: 10 }, [['a', { aa: 5 }], ['a.aa', 12]]) // { a: { aa: 12 } }
 mutate({ b: 20 }, [['a', { aa: 5 }], ['a']]) // { b: 20 }
