@@ -41,7 +41,7 @@ function separatePath(path) {
 /* ############################################################################# */
 function setValue(parent, key, value) {
   const isLocked = checkIsLocked(parent);
-  const isRemove = value instanceof XMutateRemovedElementX;
+  const isRemove = checkIsRemoved(value);
   const isUKey = key === undefined;
   const isHasKey = key ? parent.hasOwnProperty(key) : true;
   
@@ -59,36 +59,63 @@ function setValue(parent, key, value) {
   }
 
   return parent;
+}/* ############################################################################# */
+function checkIsRemoved(pObj) {
+  return pObj instanceof XMutateRemovedElementX;
 }
 /* ############################################################################# */
-function checkIsLocked(obj) {
-  return obj instanceof XMutateLockedElementX;
+function checkIsLocked(pObj) {
+  return pObj instanceof XMutateLockedElementX;
 }
 /* ############################################################################# */
-function extToTree(pExt) {
+// It has been exported for tests, but you could use it if needed
+export function checkIsExists(pObject, pPath) {
+  let node = pObject;
+  const pieces = typeof(pPath) === 'string' 
+    ? pPath.replace(/(\[|\])+/g, '').split('.') 
+    : pPath;
+  const lastIndex = pieces.length - 1;
+  for (let i = 0; i < lastIndex && node instanceof Object; i++) {
+    node = checkIsLocked(node[pieces[i]]) 
+      ? node[pieces[i]].__value__ 
+      : node[pieces[i]];
+    if (!node || !(node instanceof Object) || checkIsRemoved(node)) return false;
+  }
+
+  return node[pieces[lastIndex]] !== undefined;
+}
+/* ############################################################################# */
+function extToTree(pExt, pSource) {
   // +++++++++++++++++++++++++++
   function pairValue(pair, isMutated) {
     if (pair.length === 1) {
       return new XMutateRemovedElementX();
     }
 
-    if (
-      !isMutated 
-      && pair[1] instanceof Object 
-    ) return new XMutateLockedElementX(pair[1]);
+    if (!isMutated && pair[1] instanceof Object ) {
+      return new XMutateLockedElementX(pair[1]);
+    }
 
     return pair[1];
   }
   // +++++++++++++++++++++++++++
   if (!(pExt instanceof Object)) throw new Error('Changes should be Object or Array');
   const values = extToArray(pExt);
+  // values.sort((a, b) => a.length < b.length ? 1 : 0);
+
+
   return values.reduce((FULL_RESULT, PAIR) => {
     if (!PAIR) return FULL_RESULT;
     if (typeof(PAIR) === 'string') PAIR = [PAIR];
     if (!PAIR[0] && PAIR[0] !== 0) throw new Error('Path should not be empty');
-
-    const pieces = separatePath(PAIR[0]).split('.');
     
+    const path = separatePath(PAIR[0]);
+    if (PAIR.length < 2 || PAIR[1] === undefined) {
+      const isExists = checkIsExists(pSource, path) || checkIsExists(FULL_RESULT, path);
+      if (!isExists) return FULL_RESULT;
+    }
+
+    const pieces = path.split('.');
     let isLockedPath = false;
     pieces.reduce((parent, currentKey, currentI) => {
       const isLastPiece = currentI >= pieces.length - 1;
@@ -150,7 +177,7 @@ function updateSection(point, tree) {
   pieces.forEach(key => {
     const opt = getOptions(key, result);
     const k = opt.realKey;
-    if (tree[key] instanceof XMutateRemovedElementX) {
+    if (checkIsRemoved(tree[key])) {
       if (opt.isArray) result.splice(k, 1);
       else delete result[k];
       // setValue(result, k, tree[key]);
@@ -190,7 +217,7 @@ export default function mutate(pObj, pExt) {
   if (typeof (pObj) !== 'object') {
     throw new Error('Type of variable shoud be Object or Array');
   }
-  const tree = extToTree(pExt);
+  const tree = extToTree(pExt, pObj);
   return updateSection(pObj, tree);
 }
 /* ############################################################################# */
