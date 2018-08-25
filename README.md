@@ -115,6 +115,9 @@ If key for array item begins from `+` (\`[+${randomNumber}]\`), then value will 
 ...
 ```
 
+# Immutable comparison
+Read `ImmutableComparison.md`
+
 # Tests cases
 
 ```javascript
