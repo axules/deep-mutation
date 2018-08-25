@@ -11,7 +11,7 @@ const mutateTypes = {
   default: ''
 };
 /* ############################################################################# */
-function mutateObj(point, vType = mutateTypes.default) {
+function mutateObj(point, vType) {
   if (!point) return vType === mutateTypes.array ? [] : {};
   if (Array.isArray(point)) return point.slice(0);
   if (vType === mutateTypes.array) return [];
@@ -23,11 +23,13 @@ function mutateObj(point, vType = mutateTypes.default) {
 function extToArray(pExt) {
   if (Array.isArray(pExt)) return pExt;
   const keys = Object.keys(pExt || {});
-  return keys.map( key => 
-    pExt[key] === undefined 
-      ? [key] 
-      : [key, pExt[key]]
-  );
+  return keys.map( function (key) { 
+    return (
+      pExt[key] === undefined 
+        ? [key] 
+        : [key, pExt[key]]
+    );
+  });
 }
 /* ############################################################################# */
 function separatePath(path) {
@@ -101,10 +103,8 @@ function extToTree(pExt, pSource) {
   // +++++++++++++++++++++++++++
   if (!(pExt instanceof Object)) throw new Error('Changes should be Object or Array');
   const values = extToArray(pExt);
-  // values.sort((a, b) => a.length < b.length ? 1 : 0);
 
-
-  return values.reduce((FULL_RESULT, PAIR) => {
+  return values.reduce(function (FULL_RESULT, PAIR) {
     if (!PAIR) return FULL_RESULT;
     if (typeof(PAIR) === 'string') PAIR = [PAIR];
     if (!PAIR[0] && PAIR[0] !== 0) throw new Error('Path should not be empty');
@@ -117,10 +117,10 @@ function extToTree(pExt, pSource) {
 
     const pieces = path.split('.');
     let isLockedPath = false;
-    pieces.reduce((parent, currentKey, currentI) => {
+    pieces.reduce(function (parent, currentKey, currentI) {
       const isLastPiece = currentI >= pieces.length - 1;
       const generatedKey = currentKey === '[]'
-        ? `[+${String(Math.random()).slice(2, 12)}]`
+        ? '[+' + String(Math.random()).slice(2, 12) + ']'
         : currentKey;
       const newKey = isLockedPath 
         ? getOptions(generatedKey, parent).realKey 
@@ -170,11 +170,11 @@ function updateSection(point, tree) {
 
   if (checkIsLocked(tree)) return tree.__value__;
 
-  const pieces = Object.keys(tree).map(k => k.trim());
-  const needArray = pieces.some(p => !!ARRAY_REGEXP.exec(p));
+  const pieces = Object.keys(tree).map(function (k) { return k.trim() });
+  const needArray = pieces.some(function (p) { return !!ARRAY_REGEXP.exec(p) });
   const result = mutateObj(point, needArray ? mutateTypes.array : mutateTypes.object);
 
-  pieces.forEach(key => {
+  pieces.forEach(function (key) {
     const opt = getOptions(key, result);
     const k = opt.realKey;
     if (checkIsRemoved(tree[key])) {
@@ -194,7 +194,7 @@ export function getOptions(key, parentValue) {
     : parentValue;
   const parse = ARRAY_REGEXP.exec(key);
   const result = {
-    key,
+    key: key,
     realKey: key,
     isArray: !!parse,
     length: Array.isArray(realParentValue) ? realParentValue.length : 0
@@ -221,4 +221,3 @@ export default function mutate(pObj, pExt) {
   return updateSection(pObj, tree);
 }
 /* ############################################################################# */
-
