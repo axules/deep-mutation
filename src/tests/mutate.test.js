@@ -32,22 +32,14 @@ describe('mutate', () => {
     }
   });
 
-  test('should return function', () => {
-    const obj = { a: 100 };
-    const result = mutate(obj);
-
-    expect(result instanceof Function).toBe(true);
-    expect(result.length).toBe(1);
-  });
-
-  test('should returns new object', () => {
+  test('should return new object', () => {
     const obj = { a: 1 };
     const changes = [];
     const result = mutate(obj, changes);
     expect(result).not.toBe(obj);
   });
   
-  test('should deep update', () => {
+  test('should update deeply', () => {
     const obj = { a: { aa: { aaa: 10 }, aa2: { aa2a: 5 } }, b: { bb: { bbb: 1 } }, c: { cc: { ccc: 1 } } };
     const changes = [['a.aa.aaa', 15], ['c.cc2', 7]];
     const result = mutate(obj, changes);
@@ -182,5 +174,34 @@ describe('mutate', () => {
     const result2 = mutate(obj, objectChanges);
 
     expect(result1).toEqual(result2);
+  });
+
+  
+  describe('like function', () => {
+    test('should return function', () => {
+      const obj = { a: 100 };
+      const result = mutate(obj);
+  
+      expect(result instanceof Function).toBe(true);
+      expect(result.length).toBe(1);
+    });
+  
+    test('should do group changes changes', () => {
+      const obj = { a: 100 };
+      const changes1 = { a: 200 };
+      const changes2 = { ['b.[]']: 150, e: 1000 };
+      const changes3 = { ['b.[0]']: 300, c: 99, e: undefined };
+  
+      const func = mutate(obj);
+      func(changes1);
+      func(changes2);
+      const result = func(changes3);
+  
+      expect(result).toEqual({
+        a: 200,
+        b: [300],
+        c: 99
+      });
+    });
   });
 });
