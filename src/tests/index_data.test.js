@@ -100,63 +100,53 @@ const complexChanges = [
 describe('mutate', () => {
   describe('Dataset - data1: ', () => {
     test.each(data1)('mutate(%j   +   %j)', (obj, changes, expected) => {
-      const result = mutate(obj, changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj, changes)).toEqual(expected);
     });
 
     test.each(data1)('mutate(%j)(%j)', (obj, changes, expected) => {
-      const result = mutate(obj)(changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj)(changes)).toEqual(expected);
     });
   });
 
   describe('Dataset - data2: ', () => {
     test.each(data2)('mutate(%j   +   %j)', (obj, changes, expected) => {
-      const result = mutate(obj, changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj, changes)).toEqual(expected);
     });
 
     test.each(data2)('mutate(%j)(%j)', (obj, changes, expected) => {
-      const result = mutate(obj)(changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj)(changes)).toEqual(expected);
     });
   });
   
   describe('Dataset - arrayChanges: ', () => {
     test.each(arrayChanges)('mutate(%j   +   %j)', (obj, changes, expected) => {
-      const result = mutate(obj, changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj, changes)).toEqual(expected);
     });
 
     test.each(arrayChanges)('mutate(%j)(%j)', (obj, changes, expected) => {
-      const result = mutate(obj)(changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj)(changes)).toEqual(expected);
     });
   });
 
   describe('Dataset - objectChanges: ', () => {
     test.each(objectChanges)('mutate(%j   +   %j)', (obj, changes, expected) => {
-      const result = mutate(obj, changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj, changes)).toEqual(expected);
     });
 
     test.each(objectChanges)('mutate(%j)(%j)', (obj, changes, expected) => {
-      const result = mutate(obj)(changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj)(changes)).toEqual(expected);
     });
   });
 
   describe('Dataset - changeObject: ', () => {
     test.each(changeObject)('mutate(%j   +   %j)', (obj, changes, expected) => {
-      const result = mutate(obj, changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj, changes)).toEqual(expected);
     });
   });
 
   describe('Dataset - complexChanges: ', () => {
     test.each(complexChanges)('mutate(%j   +   %j)', (obj, changes, expected) => {
-      const result = mutate(obj, changes);
-      expect(result).toEqual(expected);
+      expect(mutate(obj, changes)).toEqual(expected);
     });
   });
 });
