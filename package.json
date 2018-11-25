@@ -32,7 +32,8 @@
     "url": "https://github.com/axules/deep-mutation.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prepack": "npm test"
   },
   "jest": {
     "runner": "jest-runner-eslint",
