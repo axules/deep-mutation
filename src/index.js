@@ -13,7 +13,7 @@ const mutateTypes = {
 /* ############################################################################# */
 function mutateObj(point, vType) {
   if (!point) return vType === mutateTypes.array ? [] : {};
-  if (Array.isArray(point)) return point.slice(0);
+  if (Array.isArray(point)) return [].concat(point);
   if (vType === mutateTypes.array) return [];
   if (typeof (point) === 'object') return Object.assign({}, point);
   if (vType === mutateTypes.object) return {};
@@ -32,7 +32,7 @@ function extToArray(pExt) {
   });
 }
 /* ############################################################################# */
-function separatePath(path) {
+export function separatePath(path) {
   return path.replace(
     new RegExp('([^\\.])(\\[)', 'g'), 
     function (match, p1, p2) {
@@ -42,20 +42,22 @@ function separatePath(path) {
 }
 /* ############################################################################# */
 function setValue(parent, key, value) {
-  const isLocked = checkIsLocked(parent);
   const isRemove = checkIsRemoved(value);
-  const isUKey = key === undefined;
-  const isHasKey = key ? parent.hasOwnProperty(key) : true;
-  
-  if (isRemove && isUKey) return parent;
-  if (isRemove && !isHasKey) return parent;
-  if (isUKey) {
+  const isUndefinedKey = key === undefined;
+  if (isRemove && (
+    isUndefinedKey || !parent.hasOwnProperty(key)
+  )) {
+    return parent;
+  }
+
+  const isLocked = checkIsLocked(parent);
+  if (isUndefinedKey) {
     if (isLocked) parent.__value__ = value;
     else return value;
   } else {
     const realParent = isLocked ? parent.__value__ : parent;
     if (isRemove) {
-      if (Array.isArray(realParent)) realParent.slice(key, 1);
+      if (Array.isArray(realParent)) realParent.splice(key, 1);
       else delete realParent[key];
     } else realParent[key] = value;
   }
@@ -119,12 +121,13 @@ function extToTree(pExt, pSource) {
     let isLockedPath = false;
     pieces.reduce(function (parent, currentKey, currentI) {
       const isLastPiece = currentI >= pieces.length - 1;
-      const generatedKey = currentKey === '[]'
+      const actualKey = currentKey === '[]'
         ? '[+' + String(Math.random()).slice(2, 12) + ']'
         : currentKey;
+
       const newKey = isLockedPath 
-        ? getOptions(generatedKey, parent).realKey 
-        : generatedKey;
+        ? getOptions(actualKey, parent).realKey 
+        : actualKey;
 
       const isLockedCurrent = !isLockedPath 
         && parent.hasOwnProperty(newKey) 
@@ -217,7 +220,21 @@ export default function mutate(pObj, pExt) {
   if (typeof (pObj) !== 'object') {
     throw new Error('Type of variable shoud be Object or Array');
   }
+
+  if (typeof(pExt) === 'undefined') {
+    return toFunction(pObj);
+  }
+
   const tree = extToTree(pExt, pObj);
   return updateSection(pObj, tree);
 }
 /* ############################################################################# */
+function toFunction(pObj) {
+  let result = pObj;
+
+  return function(pExt) {
+    if (typeof(pExt) === 'undefined') return result;
+    result = mutate(result, pExt);
+    return result;
+  };
+}
