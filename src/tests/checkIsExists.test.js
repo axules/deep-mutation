@@ -2,6 +2,10 @@ import { checkIsExists } from '../index';
 
 
 const chekIsExistsData = [
+  [null, 'a', false],
+  [[10], '0', true],
+  [[{ a: 10 }], '0.a', true],
+  [[{ a: 10 }], '1.a', false],
   [{ a: 10 }, 'a', true],
   [{ a: 10 }, 'a.aa', false],
   [{ a: 10 }, 'a2', false],
@@ -24,6 +28,8 @@ const chekIsExistsData = [
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[2]', true],
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[3]', false],
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[]', false],
+  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[+5454]', false],
+  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[].bbb', false],
 ];
 
 const chekIsExistsData2 = [
