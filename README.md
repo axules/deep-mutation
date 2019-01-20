@@ -4,6 +4,8 @@
 
 It is simple function which get object and list of changes and returns new patched object.
 
+**Since the version 2.0.0 `deep-mutation` returns new object only when anything was changed**
+
 ## Installation
 
 ```
@@ -25,9 +27,13 @@ const result = {
         }
     }
 };
-// equal with mutate
+```
+equal with `deep-mutation`
+```javascript
+import mutate from 'deep-mutation';
 const resultMutate = mutate(obj, { 'c.c3.c32': 25 });
 ```
+
 ### Simple example
 ```javascript
 import mutate from 'deep-mutation';
@@ -57,7 +63,7 @@ const result = mutate(myObject, changes);
 ```
 
 #### Result will be
-```
+```javascript
 {
     a: 111,
     b: {
@@ -114,6 +120,46 @@ If key for array item begins from `+` (\`[+${randomNumber}]\`), then value will 
     'a.[]': 100
 ...
 ```
+It is needed when you want add some items to array and use changes as Object.
+```javascript
+import muatate from 'deep-mutation';
+...
+return mutate({ a: [] }, {
+    // It is error, because JS object can't have some values with the same keys!
+    // 'a.[]': 1,
+    // 'a.[]': 2,
+    // 'a.[]': 3,
+    // 'a.[]': 4,
+
+    //It is true way
+    'a.[+1123]': 1,
+    'a.[+232]': 2,
+    'a.[+43534]': 3,
+    'a.[+64]': 4,
+});
+
+// result will be = { a: [1,2,3,4] }
+```
+
+## Deep-mutation can return patch-function
+
+If `deep-mutation` function will be called with only one argument (only object, without changes), then result will be **function**, which take one argument as changes, save and returns patched object
+
+
+```javascript
+import mutate from 'deep-mutation';
+
+const patch = mutate({ a: 1, b: 2});
+
+const result1 = patch({ c: 3 });
+// result1 === { a: 1, b: 2, c: 3}
+
+const result2 = patch({ d: 4 });
+// result2 === { a: 1, b: 2, c: 3, d: 4}
+
+const result3 = patch();
+// result3 === result2 === { a: 1, b: 2, c: 3, d: 4}
+```
 
 # Immutable comparison
 **Examples**
@@ -133,7 +179,7 @@ https://github.com/axules/deep-mutation/tree/master/ImmutableComparison
 
 ![deep-mutation vs immutable performance](https://raw.githubusercontent.com/axules/deep-mutation/master/ImmutableComparison/SyntaxComparison.png)
 
-# Tests cases
+# Tests cases / code example
 
 ```javascript
 mutate({ a: 10 }, [['a', 5]]); // { a: 5 }
@@ -280,7 +326,7 @@ mutate(
 */
 ```
 
-### It returns new object always
+### It returns the same object (**actual since version 2.0.0**)
 ```javascript
 const obj = { a: 10 };
 const result = mutate(obj, []);
