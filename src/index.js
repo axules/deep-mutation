@@ -74,19 +74,27 @@ function checkIsLocked(pObj) {
 /* ############################################################################# */
 // It has been exported for tests, but you could use it if needed
 export function checkIsExists(pObject, pPath) {
-  let node = pObject;
+  return getValue(pObject, pPath) !== undefined;
+}
+/* ############################################################################# */
+export function getValue(pObject, pPath) {
+  if (!(pObject instanceof Object)) return undefined;
+
   const pieces = typeof(pPath) === 'string' 
-    ? pPath.replace(/(\[|\])+/g, '').split('.') 
-    : pPath;
+    ? pPath.replace(/(\[|\])+/g, '').split('.')
+    : (Array.isArray(pPath) ? pPath : []);
+  if (pieces.length === 0) return pObject;
+
   const lastIndex = pieces.length - 1;
-  for (let i = 0; i < lastIndex && node instanceof Object; i++) {
+  let node = pObject;
+  for (let i = 0; i < lastIndex; i++) {
     node = checkIsLocked(node[pieces[i]]) 
       ? node[pieces[i]].__value__ 
       : node[pieces[i]];
-    if (!node || !(node instanceof Object) || checkIsRemoved(node)) return false;
+    if (!node || !(node instanceof Object) || checkIsRemoved(node)) return undefined;
   }
 
-  return node[pieces[lastIndex]] !== undefined;
+  return node[pieces[lastIndex]];
 }
 /* ############################################################################# */
 function extToTree(pExt, pSource) {
@@ -113,8 +121,9 @@ function extToTree(pExt, pSource) {
     
     const path = separatePath(PAIR[0]);
     if (PAIR.length < 2 || PAIR[1] === undefined) {
-      const isExists = checkIsExists(pSource, path) || checkIsExists(FULL_RESULT, path);
-      if (!isExists) return FULL_RESULT;
+      if (!(checkIsExists(pSource, path) || checkIsExists(FULL_RESULT, path))) {
+        return FULL_RESULT;
+      }
     }
 
     const pieces = path.split('.');
