@@ -124,6 +124,9 @@ function extToTree(pExt, pSource) {
       if (!(checkIsExists(pSource, path) || checkIsExists(FULL_RESULT, path))) {
         return FULL_RESULT;
       }
+    } else {
+      const currentValue = getValue(pSource, path);
+      if (currentValue === PAIR[1]) return FULL_RESULT;
     }
 
     const pieces = path.split('.');
@@ -235,6 +238,9 @@ export default function mutate(pObj, pExt) {
   }
 
   const tree = extToTree(pExt, pObj);
+  if (Object.getOwnPropertyNames(tree).length === 0) {
+    return pObj;
+  }
   return updateSection(pObj, tree);
 }
 /* ############################################################################# */
