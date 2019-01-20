@@ -31,13 +31,6 @@ describe('mutate', () => {
       expect(ex.message).toBe('Changes should be Object or Array');
     }
   });
-
-  test('should return new object', () => {
-    const obj = { a: 1 };
-    const changes = [];
-    const result = mutate(obj, changes);
-    expect(result).not.toBe(obj);
-  });
   
   test('should update deeply', () => {
     const obj = { a: { aa: { aaa: 10 }, aa2: { aa2a: 5 } }, b: { bb: { bbb: 1 } }, c: { cc: { ccc: 1 } } };
