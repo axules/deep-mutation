@@ -18,6 +18,7 @@ const data1 = [
 const data2 = [
   // extend object
   [{ a: { aa: 10 } }, [['a.aa', 5]], { a: { aa: 5 } }],
+  [{ a: { aa: 10 } }, [['a.bb 10', 5]], { a: { aa: 10, 'bb 10': 5 } }],
   [{ a: { aa: 10 } }, [['a.aa']], { a: { } }],
   [{ a: { aa: { aaa: 10 } } }, [['a.aa'], ['a.aa.aaa']], { a: { } }],
   [{ a: { aa: 10 } }, [['a.aa.[]', 1]], { a: { aa: [1] } }],

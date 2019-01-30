@@ -185,7 +185,7 @@ function updateSection(point, tree) {
 
   if (checkIsLocked(tree)) return tree.__value__;
 
-  const pieces = Object.keys(tree).map(function (k) { return k.trim() });
+  const pieces = Object.keys(tree);
   const needArray = pieces.some(function (p) { return !!ARRAY_REGEXP.exec(p) });
   const result = mutateObj(point, needArray ? mutateTypes.array : mutateTypes.object);
 
