@@ -245,7 +245,7 @@ export default function mutate(pObj, pExt) {
 }
 /* ############################################################################# */
 function toFunction(pObj) {
-  let result = pObj;
+  var result = pObj;
 
   return function(pExt) {
     if (typeof(pExt) === 'undefined') return result;
