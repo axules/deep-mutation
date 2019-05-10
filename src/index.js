@@ -33,12 +33,17 @@ function extToArray(pExt) {
 }
 
 export function separatePath(path) {
-  return path.replace(
-    new RegExp('([^\\.])(\\[)', 'g'), 
-    function (match, p1, p2) {
+  return typeof(path) == 'string' 
+    ? path.replace( new RegExp('([^\\.])(\\[)', 'g'), function (match, p1, p2) {
       return p1 + '.' + p2;
-    } 
-  );
+    })
+    : path;
+}
+
+export function splitPath(path) {
+  if (typeof(path) == 'string') return path.split('.');
+  if (Array.isArray(path)) return path;
+  throw new Error('Path should be String or Array of Strings');
 }
 
 function setValue(parent, key, value) {
@@ -81,21 +86,24 @@ export function checkIsExists(pObject, pPath) {
 export function getValue(pObject, pPath) {
   if (!(pObject instanceof Object)) return undefined;
 
-  const pieces = typeof(pPath) === 'string' 
-    ? pPath.replace(/(\[|\])+/g, '').split('.')
-    : (Array.isArray(pPath) ? pPath : []);
+  const pieces = splitPath(pPath);
   if (pieces.length === 0) return pObject;
+
+  function preparePiece(piece) {
+    return piece.replace(/(\[|\])+/g, '');
+  }
 
   const lastIndex = pieces.length - 1;
   let node = pObject;
   for (let i = 0; i < lastIndex; i++) {
-    node = checkIsLocked(node[pieces[i]]) 
-      ? node[pieces[i]].__value__ 
-      : node[pieces[i]];
+    const piece = preparePiece(pieces[i]);
+    node = checkIsLocked(node[piece]) 
+      ? node[piece].__value__ 
+      : node[piece];
     if (!node || !(node instanceof Object) || checkIsRemoved(node)) return undefined;
   }
 
-  return node[pieces[lastIndex]];
+  return node[preparePiece(pieces[lastIndex])];
 }
 
 export function isArrayElement(value) {
@@ -124,20 +132,19 @@ function extToTree(pExt, pSource) {
     if (typeof(PAIR) === 'string') PAIR = [PAIR];
     if (!PAIR[0] && PAIR[0] !== 0) throw new Error('Path should not be empty');
     
-    const path = separatePath(PAIR[0]);
+    const pathPieces = splitPath(separatePath(PAIR[0]));
     if (PAIR.length < 2 || PAIR[1] === undefined) {
-      if (!(checkIsExists(pSource, path) || checkIsExists(FULL_RESULT, path))) {
+      if (!(checkIsExists(pSource, pathPieces) || checkIsExists(FULL_RESULT, pathPieces))) {
         return FULL_RESULT;
       }
     } else {
-      const currentValue = getValue(pSource, path);
+      const currentValue = getValue(pSource, pathPieces);
       if (currentValue === PAIR[1]) return FULL_RESULT;
     }
 
-    const pieces = path.split('.');
     let isLockedPath = false;
-    pieces.reduce(function (parent, currentKey, currentI) {
-      const isLastPiece = currentI >= pieces.length - 1;
+    pathPieces.reduce(function (parent, currentKey, currentI) {
+      const isLastPiece = currentI >= pathPieces.length - 1;
       const actualKey = currentKey === '[]'
         ? '[+' + String(Math.random()).slice(2, 12) + ']'
         : currentKey;
