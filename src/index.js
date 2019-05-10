@@ -110,18 +110,27 @@ export function isArrayElement(value) {
   return ARRAY_REGEXP.test(value);
 }
 
+export function getPairValue(pair) {
+  if (!Array.isArray(pair) || pair.length === 0) return undefined;
+  const valueIndex = pair.length - 1 || 1;
+  return pair[valueIndex];
+}
+
 function extToTree(pExt, pSource) {
   // +++++++++++++++++++++++++++
-  function pairValue(pair, isMutated) {
+  function getNewValue(pair, isMutated) {
+    if (pair.length === 0) return undefined;
+
     if (pair.length === 1) {
       return new XMutateRemovedElementX();
     }
 
-    if (!isMutated && pair[1] instanceof Object ) {
-      return new XMutateLockedElementX(pair[1]);
+    const pairValue = getPairValue(pair);
+    if (!isMutated && pairValue instanceof Object ) {
+      return new XMutateLockedElementX(pairValue);
     }
 
-    return pair[1];
+    return pairValue;
   }
   // +++++++++++++++++++++++++++
   if (!(pExt instanceof Object)) throw new Error('Changes should be Object or Array');
@@ -133,13 +142,13 @@ function extToTree(pExt, pSource) {
     if (!PAIR[0] && PAIR[0] !== 0) throw new Error('Path should not be empty');
     
     const pathPieces = splitPath(separatePath(PAIR[0]));
-    if (PAIR.length < 2 || PAIR[1] === undefined) {
+    if (PAIR.length < 2 || getPairValue(PAIR) === undefined) {
       if (!(checkIsExists(pSource, pathPieces) || checkIsExists(FULL_RESULT, pathPieces))) {
         return FULL_RESULT;
       }
     } else {
       const currentValue = getValue(pSource, pathPieces);
-      if (currentValue === PAIR[1]) return FULL_RESULT;
+      if (currentValue === getPairValue(PAIR)) return FULL_RESULT;
     }
 
     let isLockedPath = false;
@@ -160,7 +169,7 @@ function extToTree(pExt, pSource) {
       isLockedPath = isLockedPath || isLockedCurrent;
 
       if (isLastPiece) {
-        const newValue = pairValue(PAIR, isLockedPath);
+        const newValue = getNewValue(PAIR, isLockedPath);
         if (isLockedPath) setValue(parent, newKey, newValue);
         else parent[newKey] = newValue;
         return FULL_RESULT;
