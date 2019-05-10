@@ -4,13 +4,13 @@ function XMutateLockedElementX(value) {
 }
 
 const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\].]*)\\]$');
-/* ############################################################################# */
+
 const mutateTypes = {
   array: 'array',
   object: 'object',
   default: ''
 };
-/* ############################################################################# */
+
 function mutateObj(point, vType) {
   if (!point) return vType === mutateTypes.array ? [] : {};
   if (Array.isArray(point)) return [].concat(point);
@@ -19,7 +19,7 @@ function mutateObj(point, vType) {
   if (vType === mutateTypes.object) return {};
   return point;
 }
-/* ############################################################################# */
+
 function extToArray(pExt) {
   if (Array.isArray(pExt)) return pExt;
   const keys = Object.keys(pExt || {});
@@ -31,7 +31,7 @@ function extToArray(pExt) {
     );
   });
 }
-/* ############################################################################# */
+
 export function separatePath(path) {
   return path.replace(
     new RegExp('([^\\.])(\\[)', 'g'), 
@@ -40,7 +40,7 @@ export function separatePath(path) {
     } 
   );
 }
-/* ############################################################################# */
+
 function setValue(parent, key, value) {
   const isRemove = checkIsRemoved(value);
   const isUndefinedKey = key === undefined;
@@ -63,20 +63,21 @@ function setValue(parent, key, value) {
   }
 
   return parent;
-}/* ############################################################################# */
+}
+
 function checkIsRemoved(pObj) {
   return pObj instanceof XMutateRemovedElementX;
 }
-/* ############################################################################# */
+
 function checkIsLocked(pObj) {
   return pObj instanceof XMutateLockedElementX;
 }
-/* ############################################################################# */
+
 // It has been exported for tests, but you could use it if needed
 export function checkIsExists(pObject, pPath) {
   return getValue(pObject, pPath) !== undefined;
 }
-/* ############################################################################# */
+
 export function getValue(pObject, pPath) {
   if (!(pObject instanceof Object)) return undefined;
 
@@ -96,7 +97,11 @@ export function getValue(pObject, pPath) {
 
   return node[pieces[lastIndex]];
 }
-/* ############################################################################# */
+
+export function isArrayElement(value) {
+  return ARRAY_REGEXP.test(value);
+}
+
 function extToTree(pExt, pSource) {
   // +++++++++++++++++++++++++++
   function pairValue(pair, isMutated) {
@@ -175,7 +180,7 @@ function extToTree(pExt, pSource) {
     return FULL_RESULT;
   }, {});
 }
-/* ############################################################################# */
+
 function updateSection(point, tree) {
   if (
     !tree || 
@@ -186,7 +191,7 @@ function updateSection(point, tree) {
   if (checkIsLocked(tree)) return tree.__value__;
 
   const pieces = Object.keys(tree);
-  const needArray = pieces.some(function (p) { return !!ARRAY_REGEXP.exec(p) });
+  const needArray = pieces.some(isArrayElement);
   const result = mutateObj(point, needArray ? mutateTypes.array : mutateTypes.object);
 
   pieces.forEach(function (key) {
@@ -202,7 +207,7 @@ function updateSection(point, tree) {
   });
   return result;
 }
-/* ############################################################################# */
+
 export function getOptions(key, parentValue) {
   const realParentValue = checkIsLocked(parentValue)
     ? parentValue.__value__
@@ -227,7 +232,7 @@ export function getOptions(key, parentValue) {
 
   return result;
 }
-/* ############################################################################# */
+
 export default function mutate(pObj, pExt) {
   if (typeof (pObj) !== 'object') {
     throw new Error('Type of variable shoud be Object or Array');
@@ -243,7 +248,7 @@ export default function mutate(pObj, pExt) {
   }
   return updateSection(pObj, tree);
 }
-/* ############################################################################# */
+
 function toFunction(pObj) {
   var result = pObj;
 
