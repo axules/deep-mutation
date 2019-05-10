@@ -28,10 +28,16 @@ const result = {
     }
 };
 ```
+
 equal with `deep-mutation`
+
 ```javascript
 import mutate from 'deep-mutation';
 const resultMutate = mutate(obj, { 'c.c3.c32': 25 });
+// OR
+const resultMutate = mutate(obj, [['c.c3.c32', 25]]);
+// OR since v2.1.0
+const resultMutate = mutate(obj, [[['c', 'c3', 'c32'], 25]]);
 ```
 
 ### Simple example
@@ -94,7 +100,7 @@ const changes = [
 ];
 ```
 
-OR
+**OR**
 
 ```javascript
 // object
@@ -159,6 +165,34 @@ const result2 = patch({ d: 4 });
 
 const result3 = patch();
 // result3 === result2 === { a: 1, b: 2, c: 3, d: 4}
+```
+
+## `deep-mutation` support dot in path since v2.1.0
+
+To use dot in path of changes you should use path as Array of keys:
+
+`mutate({ a: { 'a.b': { 'a.b.c': 10 }} }, [[['a', 'a.b', 'a.b.c'], newValue]])`
+
+**OR**
+
+`mutate({ a: { 'a.b': { 'a.b.c': 10 }} }, [['a-a.b-a.b.c'.split('-'), newValue]])`
+
+
+```javascript
+import mutate from 'deep-mutation';
+
+const obj = {
+    a: {
+        'a.1': {
+            'a.1.1': 100
+        }
+    }
+};
+
+const changes = [['a-a.1-a.1.1'.split('-'), 15]]
+
+const result = mutate(obj, changes);
+// result === { a: { a.1: { a.1.1: 15 } } }
 ```
 
 # Immutable comparison
