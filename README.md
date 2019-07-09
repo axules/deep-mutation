@@ -2,9 +2,9 @@
 
 ## What is it?
 
-It is simple function which get object and list of changes and returns new patched object.
+It is a simple function which gets an object and a list of changes and returns a new updated object.
 
-**Since the version 2.0.0 `deep-mutation` returns new object only when anything was changed**
+**Since the version 2.0.0 `deep-mutation` returns a new object only when something was changed**
 
 ## Installation
 
@@ -12,9 +12,10 @@ It is simple function which get object and list of changes and returns new patch
 npm install --save deep-mutation
 ```
 
-# How it works?
+# What does it do?
 
-### It will be equal
+### Getting a new object with changes
+#### with plain JavaScript
 ```javascript
 const obj = { a: 10, b: 20, c: { c1: 1, c2: 2, c3: { c31: 31 } }};
 const result = {
@@ -29,7 +30,7 @@ const result = {
 };
 ```
 
-equal with `deep-mutation`
+#### doing the same with `deep-mutation`
 
 ```javascript
 import mutate from 'deep-mutation';
@@ -68,7 +69,7 @@ const changes = [
 const result = mutate(myObject, changes);
 ```
 
-#### Result will be
+#### 'result' will be
 ```javascript
 {
     a: 111,
@@ -84,7 +85,7 @@ const result = mutate(myObject, changes);
 }
 ```
 
-### Changes can be array of arrays or object where each key is path
+### Changes can be specified as an array of arrays or an object where each key is a path
 
 ```javascript
 // array of arrays
@@ -116,40 +117,40 @@ const changes = {
 };
 ```
 
-If key for array item begins from `+` (\`[+${randomNumber}]\`), then value will be append to end of array.
+If a key for an array item starts from `+` (\`[+${randomNumber}]\`), then the value will be appended to the end of the array.
 ```javascript
 ...
     'a.[+123312312]': 100
 ...
-// will be equal
+// will be equal to
 ...
     'a.[]': 100
 ...
 ```
-It is needed when you want add some items to array and use changes as Object.
+It is usefult when you need to add some items to an array and use changes as an Object.
 ```javascript
 import muatate from 'deep-mutation';
 ...
 return mutate({ a: [] }, {
-    // It is error, because JS object can't have some values with the same keys!
+    // It is an error because JS object can't have values with the same keys!
     // 'a.[]': 1,
     // 'a.[]': 2,
     // 'a.[]': 3,
     // 'a.[]': 4,
 
-    //It is true way
+    //It is the correct way
     'a.[+1123]': 1,
     'a.[+232]': 2,
     'a.[+43534]': 3,
     'a.[+64]': 4,
 });
 
-// result will be = { a: [1,2,3,4] }
+// the result will be = { a: [1,2,3,4] }
 ```
 
-## Deep-mutation can return patch-function
+## Deep-mutation can return updater-function
 
-If `deep-mutation` function will be called with only one argument (only object, without changes), then result will be **function**, which take one argument as changes, save and returns patched object
+If `deep-mutation` function is called only with one argument (an object without changes) then it will return a **function** which can take one argument as changes. When called, it will save the changes and return an updated object.
 
 
 ```javascript
@@ -167,9 +168,9 @@ const result3 = patch();
 // result3 === result2 === { a: 1, b: 2, c: 3, d: 4}
 ```
 
-## `deep-mutation` support dot in path since v2.1.0
+## `deep-mutation` supports dots in path since v2.1.0
 
-To use dot in path of changes you should use path as Array of keys:
+In order to use dots in the path of changes you should use the path as an Array of keys:
 
 `mutate({ a: { 'a.b': { 'a.b.c': 10 }} }, [[['a', 'a.b', 'a.b.c'], newValue]])`
 
@@ -227,7 +228,7 @@ mutate({ a: 10 }, [['a']); // ['b', 5]]); // { b: 5 }
 mutate({ a: 10 }, [['a', [1,2,3]]]); // { a: [1,2,3] }
 mutate({ a: 10 }, [['a', { aa: 1 }]]); // { a: { aa: 1 } }
 mutate({ a: 10 }, [['a', 5], ['b', { bb: 2 }]]); // { a: 5, b: { bb: 2 } }
-// extend object
+// extend an object
 mutate({ a: { aa: 10 } }, [['a.aa', 5]]); // { a: { aa: 5 } }
 mutate({ a: { aa: 10 } }, [['a.aa']]); // { a: { } }
 mutate({ a: { aa: { aaa: 10 } } }, [['a.aa'], ['a.aa.aaa']]) // { a: { } }
@@ -239,7 +240,7 @@ mutate({ a: 10 }, [['a.aa.aaa', 5]]); // { a: { aa: { aaa: 5 } } }
 mutate({ a: 10 }, [['a.aa.aaa', 5], ['a.aa.aaa.aaaa', 2]]); // { a: { aa: { aaa: { aaaa: 2 } } } }
 mutate({ a: 10 }, [['a.aa', 5], ['a.aa2', 2]]); // { a: { aa: 5, aa2: 2 } }
 mutate({ a: 10 }, [['a.aa', 5], ['b.bb', 2]]); // { a: { aa: 5 }, b: { bb: 2 } }
-// extend array
+// extend an array
 mutate([], [['[]', 5]]); // [5]
 mutate({ a: [] }, [['a.[]', 5]]); // { a: [5] }
 mutate({ a: [] }, [['a.[0]', 5]]); // { a: [5] }
@@ -251,7 +252,7 @@ mutate({ a: [1] }, [['a.[]', 5]]); // { a: [1, 5] }
 mutate({ a: [1] }, [['a.[]', 5],['a.[]', 7]]); // { a: [1, 5, 7] }
 mutate({ a: [1] }, [['a.[0]', 5]]); // { a: [5] }
 mutate({ a: [1] }, [['a.[0]']]); // { a: [] }
-// changes are object
+// changes as an object
 mutate({ a: [] }, { 'a.[]': 5 }); // { a: [5] }
 mutate({ a: [] }, { 'a.[0]': 5 }); // { a: [5] }
 mutate({ a: [] }, { 'a.[2]': 5 }); // { a: [undefined, undefined, 5] }
@@ -265,7 +266,7 @@ mutate({ a: { 0: 'v0', 1: 'v1' } }, [['a.0']]); // { a: { 1: 'v1' } }
 mutate({ a: [1,2,3] }, [['a.[]']]); // { a: [1,2,3] }
 mutate({ a: [1,2,3] }, [['a.[0]']]); // { a: [2,3] }
 mutate({ a: [1,2,3] }, [['a.0']]); // { a: [undefined, 2,3] }
-// set object, extend object
+// set the object, extend the object
 mutate({ }, [['a', { aa: 5 }]]) // { a: { aa: 5 } }
 mutate({ a: 10 }, [['a', { aa: 5 }]]); // { a: { aa: 5 } }
 mutate({ a: 10 }, [['a', { aa: { aaa: 5 } }]]) // { a: { aa: { aaa: 5 } } }
@@ -277,7 +278,7 @@ mutate({ a: 10 }, [['a', { aa: 5 }], ['a.aa', 12]]) // { a: { aa: 12 } }
 mutate({ b: 20 }, [['a', { aa: 5 }], ['a']]) // { b: 20 }
 mutate({ b: 20 }, [['a', { aa: 5 }], ['a.aa']]) // { a: { }, b: 20 }
 ```
-### Complex changes tests
+### Tests for complex changes
 ```javascript
 mutate({ a: 10, b: [], c: {} }, { a: 50, b: { b1: 10 }, c: [1,2,3] }) 
 // { a: 50, b: { b1: 10 }, c: [1,2,3] }
@@ -360,14 +361,14 @@ mutate(
 */
 ```
 
-### It returns the same object (**actual since version 2.0.0**)
+### It returns the same object (**works since version 2.0.0**)
 ```javascript
 const obj = { a: 10 };
 const result = mutate(obj, []);
 expect(result).not.toBe(obj);
 ```
 
-### Full path of change will be update
+### Full path of the change will be update
 ```javascript
 const obj = { a: { aa: { aaa: 10 }, aa2: { aa2a: 5 } }, b: { bb: { bbb: 1 } }, c: { cc: { ccc: 1 } } };
 const changes = [['a.aa.aaa', 15], ['c.cc2', 7]];
@@ -392,7 +393,7 @@ expect(result.c.cc.ccc).toBe(obj.c.cc.ccc);
 ```
 
 # (!!!) Attention! Важно! Achtung!
-If you use `Object` (or `Array`) as change and change it in next changes rules, then this `Object` (or `Array`) will be changed.
+If you use an instance of `Object` (or `Array`) to construct a list of changes then this instance of `Object` (or `Array`) will be changed.
 ### Test cases
 ```javascript
 test('should change object value', () => {
@@ -424,7 +425,7 @@ test('should change array value', () => {
 });
 ```
 
-# When can it be used?
+# Use cases for 'deep-mutation'
 
 ## In redux
 ```javascript
@@ -460,7 +461,7 @@ export default (state = {}, action) => {
 // ...
 ```
 
-## In component state
+## In component's state
 ```javascript
 import mutate from 'deep-mutation';
 
