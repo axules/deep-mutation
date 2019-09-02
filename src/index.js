@@ -5,35 +5,35 @@ function XMutateLockedElementX(value) {
 
 const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\].]*)\\]$');
 
-const mutateTypes = {
-  array: 'array',
-  object: 'object',
-  default: ''
+const MUTATE_TYPES = {
+  ARRAY: 'array',
+  OBJECT: 'object',
+  DEFAULT: ''
 };
 
 function mutateObj(point, vType) {
-  if (!point) return vType === mutateTypes.array ? [] : {};
+  if (!point) return vType === MUTATE_TYPES.ARRAY ? [] : {};
   if (Array.isArray(point)) return [].concat(point);
-  if (vType === mutateTypes.array) return [];
+  if (vType === MUTATE_TYPES.ARRAY) return [];
   if (typeof (point) === 'object') return Object.assign({}, point);
-  if (vType === mutateTypes.object) return {};
+  if (vType === MUTATE_TYPES.OBJECT) return {};
   return point;
 }
 
 function extToArray(pExt) {
   if (Array.isArray(pExt)) return pExt;
   const keys = Object.keys(pExt || {});
-  return keys.map( function (key) { 
+  return keys.map( function (key) {
     return (
-      pExt[key] === undefined 
-        ? [key] 
+      pExt[key] === undefined
+        ? [key]
         : [key, pExt[key]]
     );
   });
 }
 
 export function separatePath(path) {
-  return typeof(path) == 'string' 
+  return typeof(path) == 'string'
     ? path.replace( new RegExp('([^\\.])(\\[)', 'g'), function (match, p1, p2) {
       return p1 + '.' + p2;
     })
@@ -97,8 +97,8 @@ export function getValue(pObject, pPath) {
   let node = pObject;
   for (let i = 0; i < lastIndex; i++) {
     const piece = preparePiece(pieces[i]);
-    node = checkIsLocked(node[piece]) 
-      ? node[piece].__value__ 
+    node = checkIsLocked(node[piece])
+      ? node[piece].__value__
       : node[piece];
     if (!node || !(node instanceof Object) || checkIsRemoved(node)) return undefined;
   }
@@ -140,7 +140,7 @@ function extToTree(pExt, pSource) {
     if (!PAIR) return FULL_RESULT;
     if (typeof(PAIR) === 'string') PAIR = [PAIR];
     if (!PAIR[0] && PAIR[0] !== 0) throw new Error('Path should not be empty');
-    
+
     const pathPieces = splitPath(separatePath(PAIR[0]));
     if (PAIR.length < 2 || getPairValue(PAIR) === undefined) {
       if (!(checkIsExists(pSource, pathPieces) || checkIsExists(FULL_RESULT, pathPieces))) {
@@ -158,12 +158,12 @@ function extToTree(pExt, pSource) {
         ? '[+' + String(Math.random()).slice(2, 12) + ']'
         : currentKey;
 
-      const newKey = isLockedPath 
-        ? getOptions(actualKey, parent).realKey 
+      const newKey = isLockedPath
+        ? getOptions(actualKey, parent).realKey
         : actualKey;
 
-      const isLockedCurrent = !isLockedPath 
-        && parent.hasOwnProperty(newKey) 
+      const isLockedCurrent = !isLockedPath
+        && parent.hasOwnProperty(newKey)
         && checkIsLocked(parent[newKey]);
 
       isLockedPath = isLockedPath || isLockedCurrent;
@@ -176,8 +176,8 @@ function extToTree(pExt, pSource) {
       }
 
       const currentValue = (
-        isLockedCurrent 
-          ? parent[newKey].__value__ 
+        isLockedCurrent
+          ? parent[newKey].__value__
           : parent[newKey]
       );
 
@@ -199,8 +199,8 @@ function extToTree(pExt, pSource) {
 
 function updateSection(point, tree) {
   if (
-    !tree || 
-    Array.isArray(tree) || 
+    !tree ||
+    Array.isArray(tree) ||
     typeof (tree) !== 'object'
   ) return tree;
 
@@ -208,7 +208,7 @@ function updateSection(point, tree) {
 
   const pieces = Object.keys(tree);
   const needArray = pieces.some(isArrayElement);
-  const result = mutateObj(point, needArray ? mutateTypes.array : mutateTypes.object);
+  const result = mutateObj(point, needArray ? MUTATE_TYPES.ARRAY : MUTATE_TYPES.OBJECT);
 
   pieces.forEach(function (key) {
     const opt = getOptions(key, result);
@@ -235,7 +235,7 @@ export function getOptions(key, parentValue) {
     isArray: !!parse,
     length: Array.isArray(realParentValue) ? realParentValue.length : 0
   };
-  
+
   if (parse) {
     const k = parse[1].trim();
     result.key = k;
