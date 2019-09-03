@@ -2,6 +2,10 @@ function XMutateRemovedElementX() {}
 function XMutateLockedElementX(value) {
   this.__value__ = value;
 }
+function XDeepPatchX(value) {
+  this.__value__ = value;
+}
+function XIssetMarkerX() {}
 
 const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\].]*)\\]$');
 
@@ -15,21 +19,82 @@ function mutateObj(point, vType) {
   if (!point) return vType === MUTATE_TYPES.ARRAY ? [] : {};
   if (Array.isArray(point)) return [].concat(point);
   if (vType === MUTATE_TYPES.ARRAY) return [];
-  if (typeof (point) === 'object') return Object.assign({}, point);
+  if (checkIsObject(point)) return Object.assign({}, point);
   if (vType === MUTATE_TYPES.OBJECT) return {};
   return point;
 }
 
-function extToArray(pExt) {
-  if (Array.isArray(pExt)) return pExt;
-  const keys = Object.keys(pExt || {});
-  return keys.map( function (key) {
-    return (
-      pExt[key] === undefined
-        ? [key]
-        : [key, pExt[key]]
-    );
-  });
+export function getObjectPaths(obj, prefix = [], map = null) {
+  if (!checkIsNativeObject(obj)) return [];
+
+  const keys = Object.keys(obj);
+  const isRoot = !map;
+  const myMap = isRoot
+    // eslint-disable-next-line no-undef
+    ? new Map()
+    : map;
+
+  // ignore objects that were listened. It means that recursive links will be ignored
+  if (myMap.has(obj)) return null;
+  myMap.set(obj, new XIssetMarkerX());
+
+  for (let i = 0; i < keys.length; i++) {
+    const value = obj[keys[i]];
+    const currentPath = prefix.concat([keys[i]]);
+    if (checkIsNativeObject(value)) {
+      getObjectPaths(value, currentPath, myMap);
+    } else {
+      const containsDot = currentPath.some(el => el.indexOf('.') >= 0);
+      myMap.set(containsDot ? currentPath : currentPath.join('.'), value);
+    }
+  }
+
+  if (isRoot) {
+    const result = [];
+    myMap.forEach(function(val, key) {
+      if (val instanceof XIssetMarkerX) return false;
+      result.push([key, val]);
+    });
+    return result;
+  }
+  return null;
+}
+
+export function extToArray(pExt) {
+  let result = pExt;
+  if (!Array.isArray(pExt)) {
+    if (checkIsDeepPatch(pExt)) result = [pExt];
+    else {
+      if (!checkIsNativeObject(pExt)) return [];
+      const keys = Object.keys(pExt || {});
+      result = keys.map(function (key) {
+        return (
+          pExt[key] === undefined
+            ? [key]
+            : [key, pExt[key]]
+        );
+      });
+    }
+  }
+
+  return result.reduce(function (R, pair) {
+    const isDeep = checkIsDeepPatch(pair);
+    if (!isDeep && (!pair || pair.length < 2)) return R;
+
+    const pairVal = isDeep ? pair : getPairValue(pair);
+    if (isDeep || checkIsDeepPatch(pairVal)) {
+      const pairPath = isDeep || !pair[0] ? undefined : splitPath(pair[0]);
+      const n = R.findIndex(el => el === pair);
+      if (n < 0) return R;
+
+      return R.slice(0, n)
+        .concat(
+          getObjectPaths(pairVal.__value__, pairPath),
+          R.slice(n + 1)
+        );
+    }
+    return R;
+  }, result);
 }
 
 export function separatePath(path) {
@@ -49,9 +114,7 @@ export function splitPath(path) {
 function setValue(parent, key, value) {
   const isRemove = checkIsRemoved(value);
   const isUndefinedKey = key === undefined;
-  if (isRemove && (
-    isUndefinedKey || !parent.hasOwnProperty(key)
-  )) {
+  if (isRemove && (isUndefinedKey || !parent.hasOwnProperty(key))) {
     return parent;
   }
 
@@ -78,6 +141,17 @@ function checkIsLocked(pObj) {
   return pObj instanceof XMutateLockedElementX;
 }
 
+function checkIsDeepPatch(value) {
+  return value instanceof XDeepPatchX;
+}
+
+function checkIsObject(value) {
+  return value && typeof(value) === 'object';
+}
+
+function checkIsNativeObject(value) {
+  return checkIsObject(value) && value.__proto__.constructor.name === 'Object';
+}
 // It has been exported for tests, but you could use it if needed
 export function checkIsExists(pObject, pPath) {
   return getValue(pObject, pPath) !== undefined;
@@ -100,7 +174,7 @@ export function getValue(pObject, pPath) {
     node = checkIsLocked(node[piece])
       ? node[piece].__value__
       : node[piece];
-    if (!node || !(node instanceof Object) || checkIsRemoved(node)) return undefined;
+    if (!node || !checkIsObject(node) || checkIsRemoved(node)) return undefined;
   }
 
   return node[preparePiece(pieces[lastIndex])];
@@ -119,27 +193,29 @@ export function getPairValue(pair) {
 function extToTree(pExt, pSource) {
   // +++++++++++++++++++++++++++
   function getNewValue(pair, isMutated) {
-    if (pair.length === 0) return undefined;
+    if (!pair || pair.length === 0) return undefined;
 
     if (pair.length === 1) {
       return new XMutateRemovedElementX();
     }
 
     const pairValue = getPairValue(pair);
-    if (!isMutated && pairValue instanceof Object ) {
+    if (!isMutated && checkIsObject(pairValue)) {
       return new XMutateLockedElementX(pairValue);
     }
 
     return pairValue;
   }
   // +++++++++++++++++++++++++++
-  if (!(pExt instanceof Object)) throw new Error('Changes should be Object or Array');
+  if (!checkIsObject(pExt)) throw new Error('Changes should be Object or Array');
   const values = extToArray(pExt);
 
   return values.reduce(function (FULL_RESULT, PAIR) {
     if (!PAIR) return FULL_RESULT;
     if (typeof(PAIR) === 'string') PAIR = [PAIR];
-    if (!PAIR[0] && PAIR[0] !== 0) throw new Error('Path should not be empty');
+    if (!PAIR[0] && PAIR[0] !== 0) {
+      throw new Error('Path should not be empty');
+    }
 
     const pathPieces = splitPath(separatePath(PAIR[0]));
     if (PAIR.length < 2 || getPairValue(PAIR) === undefined) {
@@ -181,7 +257,7 @@ function extToTree(pExt, pSource) {
           : parent[newKey]
       );
 
-      if (!(currentValue instanceof Object)) {
+      if (!checkIsObject(currentValue)) {
         // if (!!currentValue) {
         //   console.warn(`Warning: In "${PAIR[0]}", bad value for "${currentKey}", it will be replaced by empty Object ({})`);
         // }
@@ -199,9 +275,9 @@ function extToTree(pExt, pSource) {
 
 function updateSection(point, tree) {
   if (
-    !tree ||
-    Array.isArray(tree) ||
-    typeof (tree) !== 'object'
+    !tree
+    || Array.isArray(tree)
+    || !checkIsObject(tree)
   ) return tree;
 
   if (checkIsLocked(tree)) return tree.__value__;
@@ -249,8 +325,8 @@ export function getOptions(key, parentValue) {
   return result;
 }
 
-export default function mutate(pObj, pExt) {
-  if (typeof (pObj) !== 'object') {
+function mutate(pObj, pExt) {
+  if (!checkIsObject(pObj)) {
     throw new Error('Type of variable shoud be Object or Array');
   }
 
@@ -265,6 +341,20 @@ export default function mutate(pObj, pExt) {
   return updateSection(pObj, tree);
 }
 
+export function deepPatch(pExt) {
+  if (checkIsDeepPatch(pExt)) return pExt;
+  return new XDeepPatchX(pExt);
+}
+
+mutate.deep = function (pObj, pExt) {
+  let newExt = null;
+  if (Array.isArray(pExt)) {
+    newExt = pExt.map(el => deepPatch(el));
+  } else newExt = deepPatch(pExt);
+
+  return mutate(pObj, newExt);
+};
+
 function toFunction(pObj) {
   var result = pObj;
 
@@ -274,3 +364,5 @@ function toFunction(pObj) {
     return result;
   };
 }
+
+export default mutate;

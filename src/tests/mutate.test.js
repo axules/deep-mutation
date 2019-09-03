@@ -12,6 +12,16 @@ describe('mutate', () => {
     }
   });
 
+  test('should except by object as null', () => {
+    const obj = null;
+    const changes = [];
+    try {
+      mutate(obj, changes);
+    } catch (ex) {
+      expect(ex.message).toBe('Type of variable shoud be Object or Array');
+    }
+  });
+
   test('should except by path', () => {
     const obj = { a: 100 };
     const changes = [ ['', 1000] ];
@@ -31,7 +41,7 @@ describe('mutate', () => {
       expect(ex.message).toBe('Changes should be Object or Array');
     }
   });
-  
+
   test('should update deeply', () => {
     const obj = { a: { aa: { aaa: 10 }, aa2: { aa2a: 5 } }, b: { bb: { bbb: 1 } }, c: { cc: { ccc: 1 } } };
     const changes = [['a.aa.aaa', 15], ['c.cc2', 7]];
@@ -129,7 +139,7 @@ describe('mutate', () => {
     expect(result.b).toBe(patchArray);
     expect(patchArray).toEqual([1,2,3,4]);
   });
-  
+
   test('should returns equal results for Array and Object changes', () => {
     const obj = {
       a: 100,
@@ -140,7 +150,7 @@ describe('mutate', () => {
       },
       d: []
     };
-      
+
     const arrayChanges = [
       ['a', 111],
       ['b.b1', 222],
@@ -162,34 +172,34 @@ describe('mutate', () => {
       'd.[+554542]': 20,
       'e': [1,2,3]
     };
-      
+
     const result1 = mutate(obj, arrayChanges);
     const result2 = mutate(obj, objectChanges);
 
     expect(result1).toEqual(result2);
   });
 
-  
+
   describe('like function', () => {
     test('should return function', () => {
       const obj = { a: 100 };
       const result = mutate(obj);
-  
+
       expect(result instanceof Function).toBe(true);
       expect(result.length).toBe(1);
     });
-  
+
     test('should do group changes changes', () => {
       const obj = { a: 100 };
       const changes1 = { a: 200 };
       const changes2 = { ['b.[]']: 150, e: 1000 };
       const changes3 = { ['b.[0]']: 300, c: 99, e: undefined };
-  
+
       const func = mutate(obj);
       func(changes1);
       func(changes2);
       const result = func(changes3);
-  
+
       expect(result).toEqual({
         a: 200,
         b: [300],
