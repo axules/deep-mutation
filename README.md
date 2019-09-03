@@ -1,5 +1,14 @@
 # deep-mutation
 
+1. [What is it?](#what-is-it)
+2. [Installation](#installation)
+3. [What does it do?](#installation)
+  * [Simple example](#simple-example)
+  * [Deep-mutation can return updater-function](#deep-mutation-can-return-updater-function)
+4. [Immutable comparison](#immutable-comparison)
+5. [Tests cases / code example](#tests-cases--code-example)
+6. [Use cases for 'deep-mutation'](#use-cases-for-deep-mutation)
+
 ## What is it?
 
 It is a simple function which gets an object and a list of changes and returns a new updated object.
@@ -280,36 +289,36 @@ mutate({ b: 20 }, [['a', { aa: 5 }], ['a.aa']]) // { a: { }, b: 20 }
 ```
 ### Tests for complex changes
 ```javascript
-mutate({ a: 10, b: [], c: {} }, { a: 50, b: { b1: 10 }, c: [1,2,3] }) 
+mutate({ a: 10, b: [], c: {} }, { a: 50, b: { b1: 10 }, c: [1,2,3] })
 // { a: 50, b: { b1: 10 }, c: [1,2,3] }
 
 mutate(
-    { a: 10, b: [], c: {}, d: { d1: 12 }, e: [9,8,7] }, 
-    { 
-        a: 50, 
-        b: { b1: 10 }, 
-        c: [1,2,3], 
-        'c.[]': { cc: 22 }, 
-        'b.b2': 17, 
-        'd.d2': 15, 
-        'e.[0]': 1, 
-        'e.[]': 3 
+    { a: 10, b: [], c: {}, d: { d1: 12 }, e: [9,8,7] },
+    {
+        a: 50,
+        b: { b1: 10 },
+        c: [1,2,3],
+        'c.[]': { cc: 22 },
+        'b.b2': 17,
+        'd.d2': 15,
+        'e.[0]': 1,
+        'e.[]': 3
     }
 )
 /*
-{ 
-    a: 50, 
-    b: { b1: 10, b2: 17 }, 
-    c: [1,2,3, { cc: 22 }], 
-    d: { d1: 12, d2: 15 }, 
-    e: [1,8,7,3] 
+{
+    a: 50,
+    b: { b1: 10, b2: 17 },
+    c: [1,2,3, { cc: 22 }],
+    d: { d1: 12, d2: 15 },
+    e: [1,8,7,3]
 }
 */
 
 mutate(
-    { a: { a1: { a1_1: 22 } }, b: [{ b1: 10 }], c: [{ c1: 1 }] }, 
-    { 
-        'a.a1.a1_1': 33, 
+    { a: { a1: { a1_1: 22 } }, b: [{ b1: 10 }], c: [{ c1: 1 }] },
+    {
+        'a.a1.a1_1': 33,
         'a.a1.a1_2': 9,
         'a.a2': 14,
         'b.[0].b1': 11,
@@ -320,43 +329,43 @@ mutate(
     }
 )
 /*
-{ 
-    a: { 
+{
+    a: {
         a1: { a1_1: 33, a1_2: 9 },
         a2: 14
     },
-    b: [{ b1: 11, b2: null }, 15], 
-    c: [7] 
+    b: [{ b1: 11, b2: null }, 15],
+    c: [7]
 }
 */
 
 mutate(
-    { a: 10, b: 20 }, 
-    { 
-        a: { a1: 1, a2: 2 }, 
-        'a.a3.a3_1': 20, b: [1,2,3,{ b1: 1 }], 
-        'b.[]': 11, 
-        'b[3].b2.b2_1.b2_1_1': 'b2_1_1 value', 
-        'c.[]': 14 
+    { a: 10, b: 20 },
+    {
+        a: { a1: 1, a2: 2 },
+        'a.a3.a3_1': 20, b: [1,2,3,{ b1: 1 }],
+        'b.[]': 11,
+        'b[3].b2.b2_1.b2_1_1': 'b2_1_1 value',
+        'c.[]': 14
     }
 )
 /*
-{ 
-    a: { 
-        a1: 1, 
-        a2: 2, 
-        a3: { a3_1: 20 } 
-    }, 
+{
+    a: {
+        a1: 1,
+        a2: 2,
+        a3: { a3_1: 20 }
+    },
     b: [
-        1,2,3,{ 
-            b1: 1, 
-            b2: { 
+        1,2,3,{
+            b1: 1,
+            b2: {
                 b2_1: { b2_1_1: 'b2_1_1 value' }
             }
-        }, 
+        },
         11
-    ], 
-    c: [14] 
+    ],
+    c: [14]
 }
 */
 ```
@@ -434,7 +443,7 @@ import mutate from 'deep-mutation';
 export default (state = {}, action) => {
   const { type, payload } = action;
   const { uid } = payload;
-  
+
   switch (type) {
     case 'API_REQUEST':
       return mutate(state, [
