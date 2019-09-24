@@ -4,10 +4,12 @@
 2. [Installation](#installation)
 3. [What does it do?](#installation)
     * [Simple example](#simple-example)
+    * [mutate.deep(..) or deepPatch(...)](#mutate-deep-or-deepPatch-)
     * [Deep-mutation can return updater-function](#deep-mutation-can-return-updater-function)
 4. [Immutable comparison](#immutable-comparison)
 5. [Tests cases / code example](#tests-cases--code-example)
 6. [Use cases for 'deep-mutation'](#use-cases-for-deep-mutation)
+7. [Examples](./EXAMPLES.md)
 
 ## What is it?
 
@@ -94,7 +96,7 @@ const result = mutate(myObject, changes);
 }
 ```
 
-### Changes can be specified as an array of arrays or an object where each key is a path
+### Changes can be specified as an array of arrays or an object where each key is a path or object converted by `deepPatch` function:
 
 ```javascript
 // array of arrays
@@ -115,15 +117,30 @@ const changes = [
 ```javascript
 // object
 const changes = {
-    'a': 111,
+    a: 111,
     'b.b1': 222,
     'b.b2': 'text',
     'c.c1': 20,
     'c.c2': undefined,
     'd.[+123412]': 10,
     'd.[+544555]': 20,
-    'e': [1,2,3]
+    e: [1,2,3]
 };
+```
+
+**OR**
+
+```javascript
+// deep patch
+import { deepPatch } from 'deep-mutation';
+
+const changes = deepPatch({
+    a: 111,
+    b: { b1: 222, b2: 'text' },
+    c: { c1: 20, c2: undefined },
+    d: { '[+123412]': 10, '[+544555]': 20 },
+    e: [1,2,3]
+});
 ```
 
 If a key for an array item starts from `+` (\`[+${randomNumber}]\`), then the value will be appended to the end of the array.
@@ -144,8 +161,6 @@ return mutate({ a: [] }, {
     // It is an error because JS object can't have values with the same keys!
     // 'a.[]': 1,
     // 'a.[]': 2,
-    // 'a.[]': 3,
-    // 'a.[]': 4,
 
     //It is the correct way
     'a.[+1123]': 1,
@@ -156,6 +171,38 @@ return mutate({ a: [] }, {
 
 // the result will be = { a: [1,2,3,4] }
 ```
+
+## mutate.deep(...) or deepPatch(...)
+
+`deepPatch(patchObject: Object): PatchObject`
+
+`mutate.deep(sourceObject: Object, patchObject: Object): Object`
+
+```javascript
+import mutate from 'deep-mutation';
+
+return mutate.deep(
+    { a: 10, b: { b1: 1, b2: 2 }}, // main object
+    { c: 50, b: { b2: 100 } } // changes
+);
+
+// result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
+```
+**OR**
+```javascript
+import mutate, { deepPatch } from 'deep-mutation';
+
+return mutate(
+    { a: 10, b: { b1: 1, b2: 2 }}, // main object
+    deepPatch({ c: 50, b: { b2: 100 } }) // changes
+);
+
+// result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
+```
+
+* [deepPatch test cases / examples](./src/tests/deepToMutate.test.js)
+
+* [mutate.deep test cases / examples](./src/tests/mutateDeep.test.js)
 
 ## Deep-mutation can return updater-function
 
@@ -224,6 +271,8 @@ https://github.com/axules/deep-mutation/tree/master/ImmutableComparison
 ![deep-mutation vs immutable performance](https://raw.githubusercontent.com/axules/deep-mutation/master/ImmutableComparison/SyntaxComparison.png)
 
 # Tests cases / code example
+### [Go to tests](./src/tests)
+
 
 ```javascript
 mutate({ a: 10 }, [['a', 5]]); // { a: 5 }
