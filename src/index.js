@@ -44,7 +44,7 @@ export function getObjectPaths(obj, prefix = [], map = null) {
     if (checkIsNativeObject(value)) {
       getObjectPaths(value, currentPath, myMap);
     } else {
-      const containsDot = currentPath.some(el => el.indexOf('.') >= 0);
+      const containsDot = currentPath.some(function (el) { return el.indexOf('.') >= 0 });
       myMap.set(containsDot ? currentPath : currentPath.join('.'), value);
     }
   }
@@ -69,7 +69,7 @@ export function extToArray(pExt) {
       const keys = Object.keys(pExt || {});
       result = keys.map(function (key) {
         return (
-          pExt[key] === undefined
+          checkIsUndefined(pExt[key])
             ? [key]
             : [key, pExt[key]]
         );
@@ -84,7 +84,7 @@ export function extToArray(pExt) {
     const pairVal = isDeep ? pair : getPairValue(pair);
     if (isDeep || checkIsDeepPatch(pairVal)) {
       const pairPath = isDeep || !pair[0] ? undefined : splitPath(pair[0]);
-      const n = R.findIndex(el => el === pair);
+      const n = R.findIndex(function(el) { return el === pair });
       if (n < 0) return R;
 
       return R.slice(0, n)
@@ -113,7 +113,7 @@ export function splitPath(path) {
 
 function setValue(parent, key, value) {
   const isRemove = checkIsRemoved(value);
-  const isUndefinedKey = key === undefined;
+  const isUndefinedKey = checkIsUndefined(key);
   if (isRemove && (isUndefinedKey || !parent.hasOwnProperty(key))) {
     return parent;
   }
@@ -131,6 +131,10 @@ function setValue(parent, key, value) {
   }
 
   return parent;
+}
+
+function checkIsUndefined(value) {
+  return typeof(value) === 'undefined';
 }
 
 function checkIsRemoved(pObj) {
@@ -154,11 +158,11 @@ function checkIsNativeObject(value) {
 }
 // It has been exported for tests, but you could use it if needed
 export function checkIsExists(pObject, pPath) {
-  return getValue(pObject, pPath) !== undefined;
+  return !checkIsUndefined(getValue(pObject, pPath));
 }
 
 export function getValue(pObject, pPath) {
-  if (!(pObject instanceof Object)) return undefined;
+  if (!checkIsObject(pObject)) return undefined;
 
   const pieces = splitPath(pPath);
   if (pieces.length === 0) return pObject;
@@ -174,7 +178,9 @@ export function getValue(pObject, pPath) {
     node = checkIsLocked(node[piece])
       ? node[piece].__value__
       : node[piece];
-    if (!node || !checkIsObject(node) || checkIsRemoved(node)) return undefined;
+    if (!node || !checkIsObject(node) || checkIsRemoved(node)) {
+      return undefined;
+    }
   }
 
   return node[preparePiece(pieces[lastIndex])];
@@ -204,6 +210,10 @@ function extToTree(pExt, pSource) {
       return new XMutateLockedElementX(pairValue);
     }
 
+    if (checkIsUndefined(pairValue)) {
+      return new XMutateRemovedElementX();
+    }
+
     return pairValue;
   }
   // +++++++++++++++++++++++++++
@@ -218,7 +228,7 @@ function extToTree(pExt, pSource) {
     }
 
     const pathPieces = splitPath(separatePath(PAIR[0]));
-    if (PAIR.length < 2 || getPairValue(PAIR) === undefined) {
+    if (PAIR.length < 2 || checkIsUndefined(getPairValue(PAIR))) {
       if (!(checkIsExists(pSource, pathPieces) || checkIsExists(FULL_RESULT, pathPieces))) {
         return FULL_RESULT;
       }
@@ -330,7 +340,7 @@ function mutate(pObj, pExt) {
     throw new Error('Type of variable shoud be Object or Array');
   }
 
-  if (typeof(pExt) === 'undefined') {
+  if (checkIsUndefined(pExt)) {
     return toFunction(pObj);
   }
 
@@ -349,7 +359,7 @@ export function deepPatch(pExt) {
 mutate.deep = function (pObj, pExt) {
   let newExt = null;
   if (Array.isArray(pExt)) {
-    newExt = pExt.map(el => deepPatch(el));
+    newExt = pExt.map(function (el) { return deepPatch(el) });
   } else newExt = deepPatch(pExt);
 
   return mutate(pObj, newExt);
@@ -359,7 +369,7 @@ function toFunction(pObj) {
   var result = pObj;
 
   return function(pExt) {
-    if (typeof(pExt) === 'undefined') return result;
+    if (checkIsUndefined(pExt)) return result;
     result = mutate(result, pExt);
     return result;
   };
