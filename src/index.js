@@ -43,6 +43,8 @@ export function getObjectPaths(obj, prefix = [], map = null) {
     const currentPath = prefix.concat([keys[i]]);
     if (checkIsNativeObject(value)) {
       getObjectPaths(value, currentPath, myMap);
+    } else if (checkIsDeepPatch(value)) {
+      getObjectPaths(value.__value__, currentPath, myMap);
     } else {
       const containsDot = currentPath.some(function (el) { return el.indexOf('.') >= 0 });
       myMap.set(containsDot ? currentPath : currentPath.join('.'), value);
