@@ -4,7 +4,7 @@
 2. [Installation](#installation)
 3. [What does it do?](#installation)
     * [Simple example](#simple-example)
-    * [mutate.deep(..) or deepPatch(...)](#mutate-deep-or-deepPatch-)
+    * [mutate.deep(..) or deepPatch(...)](#mutatedeep-or-deeppatch)
     * [Deep-mutation can return updater-function](#deep-mutation-can-return-updater-function)
 4. [Immutable comparison](#immutable-comparison)
 5. [Tests cases / code example](#tests-cases--code-example)
