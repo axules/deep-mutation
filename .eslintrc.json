@@ -12,7 +12,7 @@
     ],
     "rules": {
         "keyword-spacing": ["warn"],
-        "key-spacing": ["warn"], 
+        "key-spacing": ["warn"],
         "max-len": ["warn", 120, {
             "ignoreComments": true ,
             "ignoreStrings": true,
@@ -47,4 +47,3 @@
         "module": true
     }
   }
-  
