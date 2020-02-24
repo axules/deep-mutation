@@ -42,6 +42,12 @@ const data = [
     deepPatch({ a: { '[]': 3, '[+123]': 4 } }),
     { a: [1, 2, 3, 4] },
   ],
+
+  [
+    { a: { 'a1.1': 'Hi', 'a1.2': 'world' } },
+    deepPatch({ a: { 'a1.1': 'Hello' } }),
+    { a: { 'a1.1': 'Hello', 'a1.2': 'world' } },
+  ],
 ];
 
 describe('mutate with deep', () => {
