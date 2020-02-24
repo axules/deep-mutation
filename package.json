@@ -39,7 +39,7 @@
     "runner": "jest-runner-eslint",
     "displayName": "lint",
     "testMatch": [
-      "<rootDir>/src/**/*.js"
+      "<rootDir>/src/**/*.test.js"
     ]
   },
   "devDependencies": {

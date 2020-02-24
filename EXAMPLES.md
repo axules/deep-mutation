@@ -28,14 +28,13 @@ import mutate, { deepPatch } from 'deep-mutation';
 
 const todos = [
   {
-    id: '199',
-    state: 'new',
+    id: 998941425,
     title: 'Add useful somthing',
     description: 'I would like to make something interesting and useful'
     steps: [
-      { text: 'idea', state: 'no' },
-      { text: 'prepare', state: 'no' },
-      { text: 'make', state: 'no' }
+      { id: 1, text: 'idea', isFinished: false },
+      { id: 2, text: 'prepare', isFinished: false },
+      { id: 3, text: 'make', isFinished: false }
     ]
   },
   ...
@@ -43,20 +42,49 @@ const todos = [
 
 ...
 
-function completeSteps(todoId, steps) {
-  const n = todos.find(el => el.id == todoId);
+function findTodo(todoId) {
+  return todos.find(el => el.id == todoId);
+}
+
+function findStep(todo, stepId) {
+  return todos.find(el => el.id == todoId);
+}
+
+function changeStepState(todoId, stepId, isFinished) {
+  const todoPos = findTodo(todoId);
+  const stepPos = findStep(todos[todoPos], stepId);
 
   return mutate(
     todos,
-    steps.map(i => [`[${n}].steps.[${i}].state`, 'yes'])
+    { [`[${todoPos}].steps.[${stepPos}].isFinished`]: isFinished }
   );
 }
 
-function updateStep(todo, stepNumber, text) {
+function changeStepText(todoId, stepId, text) {
+  const todoPos = findTodo(todoId);
+  const stepPos = findStep(todos[todoPos], stepId);
 
   return mutate(
-    todo,
-    deepPatch({ [`[${stepNumber}]`]: { text } }),
+    todos,
+    { [`[${todoPos}].steps.[${stepPos}].text`]: text }
   );
+}
+
+function addStep(todoId, text) {
+  const todoPos = findTodo(todoId);
+  const newStep = { id: Math.floor(Math.random() * 10000), text, isFinished: false };
+  return mutate(
+    todos,
+    { [`[${todoPos}].steps.[]`]: newStep };
+  )
+}
+
+function removeStep(todoId, stepId) {
+  const todoPos = findTodo(todoId);
+  const stepPos = findStep(todos[todoPos], stepId);
+  return mutate(
+    todos,
+    { [`[${todoPos}].steps.[${stepPos}].text`]: undefined }
+  )
 }
 ```
