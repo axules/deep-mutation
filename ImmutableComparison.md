@@ -1,16 +1,13 @@
-https://github.com/axules/deep-mutation/tree/master/ImmutableComparison
+## Performance comparison
+**Sandbox editor**: https://codesandbox.io/s/l9ovomzv99
 
-# Performance comparison
-**Sandbox editor**: https://codesandbox.io/s/km3w4jowo5
+**Sandbox view**: https://l9ovomzv99.csb.app/
 
-**Sandbox view**: https://km3w4jowo5.codesandbox.io/
+![deep-mutation vs immutable performance](./ImmutableComparison/performanceResult.png)
 
-![deep-mutation vs immutable performance](https://raw.githubusercontent.com/axules/deep-mutation/master/ImmutableComparison/performanceResult.png)
-
-
-# Syntax comparison
+## Syntax comparison
 **Sandbox editor**: https://codesandbox.io/s/j4wkq2znj5
 
 **Sandbox view**: https://j4wkq2znj5.codesandbox.io/
 
-![deep-mutation vs immutable performance](https://raw.githubusercontent.com/axules/deep-mutation/master/ImmutableComparison/SyntaxComparison.png)
+![deep-mutation vs immutable performance](./ImmutableComparison/SyntaxComparison.png)

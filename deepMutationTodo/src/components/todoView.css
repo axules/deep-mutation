@@ -1,0 +1,14 @@
+.todoView {
+  margin-top: 10px;
+  border-bottom: 1px dotted green;
+  padding: 5px;
+}
+
+.todoView_title {
+  font-weight: 600;
+}
+
+.todoView_description {
+  font-size: 75%;
+  padding: 5px 10px;
+}

@@ -1,0 +1,9 @@
+.todos {
+  padding: 10px;
+}
+
+.todos_controls {
+  padding: 5px 0;
+  border-bottom: 2px solid #e1e1e1;
+  text-align: right;
+}
