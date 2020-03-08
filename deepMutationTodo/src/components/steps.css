@@ -1,0 +1,16 @@
+.steps {
+  list-style: none;
+}
+
+.step button {
+  margin-left: 10px;
+}
+
+.step:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.step.m-done {
+  opacity: 0.5;
+  text-decoration: line-through;
+}

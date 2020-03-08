@@ -1,6 +1,6 @@
 {
   "name": "deep-mutation",
-  "version": "3.0.0",
+  "version": "3.1.1",
   "author": {
     "name": "Shelest Denis",
     "email": "axules@gmail.com"
@@ -14,7 +14,7 @@
       "email": "axules@gmail.com"
     }
   ],
-  "main": "src/index.js",
+  "main": "./dist/index.js",
   "deprecated": false,
   "description": "The mutate method returns new object with changes",
   "keywords": [
@@ -33,7 +33,8 @@
   },
   "scripts": {
     "test": "jest",
-    "prepack": "npm test"
+    "build": "npm test && babel -d dist ./src/index.js",
+    "prepack": "npm run build"
   },
   "jest": {
     "runner": "jest-runner-eslint",
@@ -43,21 +44,25 @@
     ]
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.6",
-    "babel-jest": "^23.4.0",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-0": "^6.24.1",
-    "eslint": "^5.2.0",
-    "eslint-loader": "^2.1.0",
-    "eslint-plugin-babel": "^5.1.0",
-    "eslint-plugin-flowtype": "^2.50.0",
-    "eslint-plugin-import": "^2.13.0",
-    "jest": "^23.4.1",
-    "jest-runner-eslint": "^0.6.0"
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/node": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/runtime-corejs3": "^7.8.3",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^25.1.0",
+    "babel-loader": "^8.0.6",
+    "core-js": "^3.6.4",
+    "eslint": "^6.8.0",
+    "eslint-loader": "^3.0.3",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-flowtype": "^4.6.0",
+    "eslint-plugin-import": "^2.20.0",
+    "jest": "^25.1.0",
+    "jest-runner-eslint": "^0.7.6"
   },
   "files": [
+    "dist",
     "src"
   ]
 }

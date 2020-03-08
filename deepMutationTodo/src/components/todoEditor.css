@@ -1,0 +1,22 @@
+.todoEditor input {
+  display: block;
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 5px;
+}
+
+.todoEditor textarea {
+  display: block;
+  width: 100%;
+  padding: 5px;
+}
+
+.todoEditor_controls {
+  margin-top: 10px;
+}
+
+.todoEditor_errors {
+  color: #a40917;
+  margin: 10px 0 0 10px;
+  padding: 0 0 0 5px;
+}

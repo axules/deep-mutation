@@ -9,7 +9,8 @@
 4. [Immutable comparison](#immutable-comparison)
 5. [Tests cases / code example](#tests-cases--code-example)
 6. [Use cases for 'deep-mutation'](#use-cases-for-deep-mutation)
-7. [Examples](./EXAMPLES.md)
+7. [Live TODO Example in Codesandbox](https://codesandbox.io/s/deep-mutation-todo-1w022)
+8. [Examples](./EXAMPLES.md)
 
 ## What is it?
 
@@ -23,7 +24,7 @@ It is a simple function which gets an object and a list of changes and returns a
 npm install --save deep-mutation
 ```
 
-# What does it do?
+## What does it do?
 
 ### Getting a new object with changes
 #### with plain JavaScript
@@ -50,6 +51,8 @@ const resultMutate = mutate(obj, { 'c.c3.c32': 25 });
 const resultMutate = mutate(obj, [['c.c3.c32', 25]]);
 // OR since v2.1.0
 const resultMutate = mutate(obj, [[['c', 'c3', 'c32'], 25]]);
+// OR since v3.0.0
+const resultMutate = mutate.deep(obj, { c: { c3: { c32: 25 } } });
 ```
 
 ### Simple example
@@ -252,23 +255,22 @@ const result = mutate(obj, changes);
 // result === { a: { a.1: { a.1.1: 15 } } }
 ```
 
-# Immutable comparison
-**Examples**
-https://github.com/axules/deep-mutation/tree/master/ImmutableComparison
+## Immutable comparison
+[ImmutableComparison.md](./ImmutableComparison.md)
 
 ## Performance comparison
-**Sandbox editor**: https://codesandbox.io/s/km3w4jowo5
+**Sandbox editor**: https://codesandbox.io/s/l9ovomzv99
 
-**Sandbox view**: https://km3w4jowo5.codesandbox.io/
+**Sandbox view**: https://l9ovomzv99.csb.app/
 
-![deep-mutation vs immutable performance](https://raw.githubusercontent.com/axules/deep-mutation/master/ImmutableComparison/performanceResult.png)
+![deep-mutation vs immutable performance](./ImmutableComparison/performanceResult.png)
 
 ## Syntax comparison
 **Sandbox editor**: https://codesandbox.io/s/j4wkq2znj5
 
 **Sandbox view**: https://j4wkq2znj5.codesandbox.io/
 
-![deep-mutation vs immutable performance](https://raw.githubusercontent.com/axules/deep-mutation/master/ImmutableComparison/SyntaxComparison.png)
+![deep-mutation vs immutable performance](./ImmutableComparison/SyntaxComparison.png)
 
 # Tests cases / code example
 ### [Go to tests](./src/tests)
@@ -424,30 +426,6 @@ mutate(
 const obj = { a: 10 };
 const result = mutate(obj, []);
 expect(result).not.toBe(obj);
-```
-
-### Full path of the change will be update
-```javascript
-const obj = { a: { aa: { aaa: 10 }, aa2: { aa2a: 5 } }, b: { bb: { bbb: 1 } }, c: { cc: { ccc: 1 } } };
-const changes = [['a.aa.aaa', 15], ['c.cc2', 7]];
-const result = mutate(obj, changes);
-expect(result).not.toBe(obj);
-expect(result.a).not.toBe(obj.a);
-
-expect(result.a.aa).not.toBe(obj.a.aa);
-expect(result.a.aa.aaa).not.toBe(obj.a.aa.aaa);
-
-expect(result.a.aa2).toBe(obj.a.aa2);
-expect(result.a.aa2.aa2a).toBe(obj.a.aa2.aa2a);
-
-expect(result.b).toBe(obj.b);
-expect(result.b.bb).toBe(obj.b.bb);
-expect(result.b.bb.bbb).toBe(obj.b.bb.bbb);
-
-expect(result.c).not.toBe(obj.c);
-expect(result.c.cc).toBe(obj.c.cc);
-expect(result.c.cc2).not.toBe(obj.c.cc2);
-expect(result.c.cc.ccc).toBe(obj.c.cc.ccc);
 ```
 
 # (!!!) Attention! Важно! Achtung!
