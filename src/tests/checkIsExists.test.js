@@ -14,9 +14,9 @@ const chekIsExistsData = [
   [{ a: { aa: { aaa: 10 } } }, 'a', true],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa', true],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa.aaa', true],
-  [{ a: { aa: { aaa: 10 } } }, '[a]', true],
-  [{ a: { aa: { aaa: 10 } } }, 'a.[aa]', true],
-  [{ a: { aa: { aaa: 10 } } }, '[a].[aa].[aaa]', true],
+  [{ a: { aa: { aaa: 10 } } }, '[a]', false],
+  [{ a: { aa: { aaa: 10 } } }, 'a.[aa]', false],
+  [{ a: { aa: { aaa: 10 } } }, '[a].[aa].[aaa]', false],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa.aaa2', false],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa2', false],
   [{ a: { aa: { aaa: 10 } } }, 'a2', false],
@@ -30,6 +30,17 @@ const chekIsExistsData = [
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[]', false],
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[+5454]', false],
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[].bbb', false],
+
+  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=3]', true],
+  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=99]', false],
+
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].id', true],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.1.id', true],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].data', false],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].data.value', false],
+  [{ a: [{ id: 10 }, { id: 20, data: {} }] }, 'a.[1].data', true],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[=id=20]', true],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[=id=20].id', true],
 ];
 
 const chekIsExistsData2 = [

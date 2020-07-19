@@ -4,6 +4,7 @@
 2. [Installation](#installation)
 3. [What does it do?](#installation)
     * [Simple example](#simple-example)
+    * [Array specific keys](#array-specific-keys)
     * [mutate.deep(..) or deepPatch(...)](#mutatedeep-or-deeppatch)
     * [Deep-mutation can return updater-function](#deep-mutation-can-return-updater-function)
 4. [Immutable comparison](#immutable-comparison)
@@ -31,14 +32,14 @@ npm install --save deep-mutation
 ```javascript
 const obj = { a: 10, b: 20, c: { c1: 1, c2: 2, c3: { c31: 31 } }};
 const result = {
-    ...obj,
-    c: {
-        ...obj.c,
-        c3: {
-            ...obj.c3,
-            c32: 25
-        }
+  ...obj,
+  c: {
+    ...obj.c,
+    c3: {
+      ...obj.c3,
+      c32: 25
     }
+  }
 };
 ```
 
@@ -60,24 +61,24 @@ const resultMutate = mutate.deep(obj, { c: { c3: { c32: 25 } } });
 import mutate from 'deep-mutation';
 
 const myObject = {
-    a: 100,
-    b: 200,
-    c: {
-        c1: 1,
-        c2: 2
-    },
-    d: []
+  a: 100,
+  b: 200,
+  c: {
+    c1: 1,
+    c2: 2
+  },
+  d: []
 };
 
 const changes = [
-    ['a', 111],
-    ['b.b1', 222],
-    ['b.b2', 'text'],
-    ['c.c1', 20],
-    ['c.c2'],
-    ['d.[]', 10],
-    ['d.[]', 20],
-    ['e', [1,2,3]]
+  ['a', 111],
+  ['b.b1', 222],
+  ['b.b2', 'text'],
+  ['c.c1', 20],
+  ['c.c2'],
+  ['d.[]', 10],
+  ['d.[]', 20],
+  ['e', [1,2,3]]
 ];
 
 const result = mutate(myObject, changes);
@@ -86,16 +87,16 @@ const result = mutate(myObject, changes);
 #### 'result' will be
 ```javascript
 {
-    a: 111,
-    b: {
-        b1: 222,
-        b2: 'text'
-    },
-    c: {
-        c1: 20
-    },
-    d: [10,20],
-    e: [1,2,3]
+  a: 111,
+  b: {
+    b1: 222,
+    b2: 'text'
+  },
+  c: {
+    c1: 20
+  },
+  d: [10,20],
+  e: [1,2,3]
 }
 ```
 
@@ -104,14 +105,14 @@ const result = mutate(myObject, changes);
 ```javascript
 // array of arrays
 const changes = [
-    ['a', 111],
-    ['b.b1', 222],
-    ['b.b2', 'text'],
-    ['c.c1', 20],
-    ['c.c2'],
-    ['d.[]', 10],
-    ['d.[]', 20],
-    ['e', [1,2,3]]
+  ['a', 111],
+  ['b.b1', 222],
+  ['b.b2', 'text'],
+  ['c.c1', 20],
+  ['c.c2'],
+  ['d.[]', 10],
+  ['d.[]', 20],
+  ['e', [1,2,3]]
 ];
 ```
 
@@ -120,14 +121,14 @@ const changes = [
 ```javascript
 // object
 const changes = {
-    a: 111,
-    'b.b1': 222,
-    'b.b2': 'text',
-    'c.c1': 20,
-    'c.c2': undefined,
-    'd.[+123412]': 10,
-    'd.[+544555]': 20,
-    e: [1,2,3]
+  a: 111,
+  'b.b1': 222,
+  'b.b2': 'text',
+  'c.c1': 20,
+  'c.c2': undefined,
+  'd.[+123412]': 10,
+  'd.[+544555]': 20,
+  e: [1,2,3]
 };
 ```
 
@@ -138,41 +139,105 @@ const changes = {
 import { deepPatch } from 'deep-mutation';
 
 const changes = deepPatch({
-    a: 111,
-    b: { b1: 222, b2: 'text' },
-    c: { c1: 20, c2: undefined },
-    d: { '[+123412]': 10, '[+544555]': 20 },
-    e: [1,2,3]
+  a: 111,
+  b: { b1: 222, b2: 'text' },
+  c: { c1: 20, c2: undefined },
+  d: { '[+123412]': 10, '[+544555]': 20 },
+  e: [1,2,3]
 });
 ```
 
-If a key for an array item starts from `+` (\`[+${randomNumber}]\`), then the value will be appended to the end of the array.
+## Array specific keys
+
+### :> a.[] or a.[+242234]
+If a key for an array item starts from `+`, then the **value will be appended to the end of the array** like `[].push()`.
 ```javascript
 ...
-    'a.[+123312312]': 100
-...
+  'arr.[+123312312]': 100
+// OR
+  'arr.[+6]': 100
 // will be equal to
-...
-    'a.[]': 100
+  'arr.[]': 100
 ...
 ```
 It is usefult when you need to add some items to an array and use changes as an Object.
 ```javascript
 import muatate from 'deep-mutation';
 ...
-return mutate({ a: [] }, {
-    // It is an error because JS object can't have values with the same keys!
-    // 'a.[]': 1,
-    // 'a.[]': 2,
+return mutate({ arr: [] }, {
+  // It is an error because JS object can't have values with the same keys!
+  // 'arr.[]': 1,
+  // 'arr.[]': 2,
 
-    //It is the correct way
-    'a.[+1123]': 1,
-    'a.[+232]': 2,
-    'a.[+43534]': 3,
-    'a.[+64]': 4,
+  //It is the correct way
+  'arr.[+1123]': 1,
+  'arr.[+232]': 2,
+  'arr.[+43534]': 3,
+  'arr.[+64]': 4,
+  'arr.[]': 5,
 });
 
-// the result will be = { a: [1,2,3,4] }
+// the result will be = { arr: [1,2,3,4,5] }
+```
+### :> arr.[=10] or arr.[=id=15]
+
+If a key for an array item starts from `=` ([=10] or [=data.id=99]), then index will be found by comparison item or item's property and value. `[=field.path=value]`.
+```javascript
+import muatate from 'deep-mutation';
+...
+return mutate({ arr: [1,2,3,4,5,6,7,8] }, {
+  'arr.[=2]': 200,
+  // index for element with value `2` will be `1`
+  'arr.[=8]': 800,
+  // index for element with value `8` will be `7`
+  'arr.[=100]': 'undefined',
+  // `100` is not found in arr and will be ignored, index is `-1`
+});
+
+// the result will be = { arr: [1,200,3,4,5,6,7,800] }
+```
+`arr.[=]` or `arr.[=value=]` - to find empty string value in array (or item.value = '')
+`arr.[=false]` or `arr.[=value=]` - to find 'false' value in array (or item.value = false)
+
+Example for objects
+```javascript
+import muatate from 'deep-mutation';
+...
+return mutate({ arr: [{ id: 10 }, { id: 20 }] }, {
+  'arr.[=id=20].name': 'Name 20',
+  // index for element with `id=20` will be `1`
+  'arr.[=id=999]': 'undefined',
+  // it is not found, ignored
+});
+
+// the result will be = { arr: [{ id: 10 }, { id: 20, name: 'Name 20' }] }
+```
+
+Example with deep path
+```javascript
+import muatate from 'deep-mutation';
+...
+return mutate({ arr: [{ data: { id: 12 }}, { data: { id: 30 }}] }, {
+  'arr.[=data.id=12].data.v': 'value1',
+  // index for element with `data.id=12` will be `0`
+  'arr.[=data.id=999]': 'undefined',
+  // it is not found, ignored
+});
+
+// the result will be = { arr: [{ data: { id: 12, v: 'value1' }}, { data: { id: 30 }}] }
+```
+
+### :> arr.[-1]
+It will be **ignored**.
+
+```javascript
+import muatate from 'deep-mutation';
+...
+return mutate({ arr: [1,2,3,4] }, {
+  'arr.[-1]': 999,
+});
+
+// the result will be = { arr: [1,2,3,4] }
 ```
 
 ## mutate.deep(...) or deepPatch(...)
@@ -185,8 +250,8 @@ return mutate({ a: [] }, {
 import mutate from 'deep-mutation';
 
 return mutate.deep(
-    { a: 10, b: { b1: 1, b2: 2 }}, // main object
-    { c: 50, b: { b2: 100 } } // changes
+  { a: 10, b: { b1: 1, b2: 2 }}, // main object
+  { c: 50, b: { b2: 100 } } // changes
 );
 
 // result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
@@ -196,8 +261,8 @@ return mutate.deep(
 import mutate, { deepPatch } from 'deep-mutation';
 
 return mutate(
-    { a: 10, b: { b1: 1, b2: 2 }}, // main object
-    deepPatch({ c: 50, b: { b2: 100 } }) // changes
+  { a: 10, b: { b1: 1, b2: 2 }}, // main object
+  deepPatch({ c: 50, b: { b2: 100 } }) // changes
 );
 
 // result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
@@ -242,11 +307,11 @@ In order to use dots in the path of changes you should use the path as an Array 
 import mutate from 'deep-mutation';
 
 const obj = {
-    a: {
-        'a.1': {
-            'a.1.1': 100
-        }
+  a: {
+    'a.1': {
+      'a.1.1': 100
     }
+  }
 };
 
 const changes = [['a-a.1-a.1.1'.split('-'), 15]]
@@ -344,79 +409,79 @@ mutate({ a: 10, b: [], c: {} }, { a: 50, b: { b1: 10 }, c: [1,2,3] })
 // { a: 50, b: { b1: 10 }, c: [1,2,3] }
 
 mutate(
-    { a: 10, b: [], c: {}, d: { d1: 12 }, e: [9,8,7] },
-    {
-        a: 50,
-        b: { b1: 10 },
-        c: [1,2,3],
-        'c.[]': { cc: 22 },
-        'b.b2': 17,
-        'd.d2': 15,
-        'e.[0]': 1,
-        'e.[]': 3
-    }
-)
-/*
-{
+  { a: 10, b: [], c: {}, d: { d1: 12 }, e: [9,8,7] },
+  {
     a: 50,
-    b: { b1: 10, b2: 17 },
-    c: [1,2,3, { cc: 22 }],
-    d: { d1: 12, d2: 15 },
-    e: [1,8,7,3]
+    b: { b1: 10 },
+    c: [1,2,3],
+    'c.[]': { cc: 22 },
+    'b.b2': 17,
+    'd.d2': 15,
+    'e.[0]': 1,
+    'e.[]': 3
+  }
+)
+/*
+{
+  a: 50,
+  b: { b1: 10, b2: 17 },
+  c: [1,2,3, { cc: 22 }],
+  d: { d1: 12, d2: 15 },
+  e: [1,8,7,3]
 }
 */
 
 mutate(
-    { a: { a1: { a1_1: 22 } }, b: [{ b1: 10 }], c: [{ c1: 1 }] },
-    {
-        'a.a1.a1_1': 33,
-        'a.a1.a1_2': 9,
-        'a.a2': 14,
-        'b.[0].b1': 11,
-        'b.[]': 15,
-        'b.[0].b2': null,
-        'c[0].c1': undefined,
-        'c[0]': 7
-    }
+  { a: { a1: { a1_1: 22 } }, b: [{ b1: 10 }], c: [{ c1: 1 }] },
+  {
+    'a.a1.a1_1': 33,
+    'a.a1.a1_2': 9,
+    'a.a2': 14,
+    'b.[0].b1': 11,
+    'b.[]': 15,
+    'b.[0].b2': null,
+    'c[0].c1': undefined,
+    'c[0]': 7
+  }
 )
 /*
 {
-    a: {
-        a1: { a1_1: 33, a1_2: 9 },
-        a2: 14
-    },
-    b: [{ b1: 11, b2: null }, 15],
-    c: [7]
+  a: {
+    a1: { a1_1: 33, a1_2: 9 },
+    a2: 14
+  },
+  b: [{ b1: 11, b2: null }, 15],
+  c: [7]
 }
 */
 
 mutate(
-    { a: 10, b: 20 },
-    {
-        a: { a1: 1, a2: 2 },
-        'a.a3.a3_1': 20, b: [1,2,3,{ b1: 1 }],
-        'b.[]': 11,
-        'b[3].b2.b2_1.b2_1_1': 'b2_1_1 value',
-        'c.[]': 14
-    }
+  { a: 10, b: 20 },
+  {
+    a: { a1: 1, a2: 2 },
+    'a.a3.a3_1': 20, b: [1,2,3,{ b1: 1 }],
+    'b.[]': 11,
+    'b[3].b2.b2_1.b2_1_1': 'b2_1_1 value',
+    'c.[]': 14
+  }
 )
 /*
 {
-    a: {
-        a1: 1,
-        a2: 2,
-        a3: { a3_1: 20 }
+  a: {
+    a1: 1,
+    a2: 2,
+    a3: { a3_1: 20 }
+  },
+  b: [
+    1,2,3, {
+      b1: 1,
+      b2: {
+        b2_1: { b2_1_1: 'b2_1_1 value' }
+      }
     },
-    b: [
-        1,2,3,{
-            b1: 1,
-            b2: {
-                b2_1: { b2_1_1: 'b2_1_1 value' }
-            }
-        },
-        11
-    ],
-    c: [14]
+    11
+  ],
+  c: [14]
 }
 */
 ```
@@ -433,31 +498,31 @@ If you use an instance of `Object` (or `Array`) to construct a list of changes t
 ### Test cases
 ```javascript
 test('should change object value', () => {
-    const obj = { b: [] };
-    const patchObject = { b1: 1, b2: 2, b3: 3 };
-    const changes = [
-      ['b', patchObject],
-      ['b.b4', 4]
-    ];
-    const resut = mutate(obj, changes);
+  const obj = { b: [] };
+  const patchObject = { b1: 1, b2: 2, b3: 3 };
+  const changes = [
+    ['b', patchObject],
+    ['b.b4', 4]
+  ];
+  const resut = mutate(obj, changes);
 
-    expect(resut.b).toEqual(patchObject);
-    expect(resut.b).toBe(patchObject);
-    expect(patchObject).toEqual({ b1: 1, b2: 2, b3: 3, b4: 4 });
+  expect(resut.b).toEqual(patchObject);
+  expect(resut.b).toBe(patchObject);
+  expect(patchObject).toEqual({ b1: 1, b2: 2, b3: 3, b4: 4 });
 });
 
 test('should change array value', () => {
-    const obj = { b: [5,6] };
-    const patchArray = [1,2,3];
-    const changes = [
-      ['b', patchArray],
-      ['b.[]', 4]
-    ];
-    const resut = mutate(obj, changes);
+  const obj = { b: [5,6] };
+  const patchArray = [1,2,3];
+  const changes = [
+    ['b', patchArray],
+    ['b.[]', 4]
+  ];
+  const resut = mutate(obj, changes);
 
-    expect(resut.b).toEqual(patchArray);
-    expect(resut.b).toBe(patchArray);
-    expect(patchArray).toEqual([1,2,3,4]);
+  expect(resut.b).toEqual(patchArray);
+  expect(resut.b).toBe(patchArray);
+  expect(patchArray).toEqual([1,2,3,4]);
 });
 ```
 
@@ -472,26 +537,26 @@ export default (state = {}, action) => {
   const { uid } = payload;
 
   switch (type) {
-    case 'API_REQUEST':
-      return mutate(state, [
-        [`${uid}._status`, 'request']
-      ]);
+  case 'API_REQUEST':
+    return mutate(state, [
+      [`${uid}._status`, 'request']
+    ]);
 
-    case 'API_REQUEST__OK':
-      return mutate(state, [
-        [`${uid}._status`, 'success'],
-        [`${uid}.result`, payload.body],
-      ]);
+  case 'API_REQUEST__OK':
+    return mutate(state, [
+      [`${uid}._status`, 'success'],
+      [`${uid}.result`, payload.body],
+    ]);
 
-    case 'API_REQUEST__FAIL':
-      return mutate(state, [
-        [`${uid}._status`, 'fail'],
-        [`${uid}.result`],
-        [`${uid}.error`, payload.error]
-      ]);
+  case 'API_REQUEST__FAIL':
+    return mutate(state, [
+      [`${uid}._status`, 'fail'],
+      [`${uid}.result`],
+      [`${uid}.error`, payload.error]
+    ]);
 
-    default:
-      return state;
+  default:
+    return state;
   }
 };
 // ...
@@ -502,15 +567,15 @@ export default (state = {}, action) => {
 import mutate from 'deep-mutation';
 
 class ExampleComponent extends Component {
-    // ...
-    onClick = () => this.setState(state =>
-        mutate(state, {
-            isFetching: true,
-            'data.value': 'default',
-            'data.key': null,
-            validation: null
-        })
-    );
-    // ...
+  // ...
+  onClick = () => this.setState(state =>
+    mutate(state, {
+      isFetching: true,
+      'data.value': 'default',
+      'data.key': null,
+      validation: null
+    })
+  );
+  // ...
 }
 ```

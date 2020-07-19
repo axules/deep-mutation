@@ -14,9 +14,9 @@ const data = [
   [{ a: { aa: { aaa: 10 } } }, 'a', { aa: { aaa: 10 } }],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa', { aaa: 10 }],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa.aaa', 10],
-  [{ a: { aa: { aaa: 10 } } }, '[a]', { aa: { aaa: 10 } }],
-  [{ a: { aa: { aaa: 10 } } }, 'a.[aa]', { aaa: 10 }],
-  [{ a: { aa: { aaa: 10 } } }, '[a].[aa].[aaa]', 10],
+  [{ a: { aa: { aaa: 10 } } }, '[a]', undefined],
+  [{ a: { aa: { aaa: 10 } } }, 'a.[aa]', undefined],
+  [{ a: { aa: { aaa: 10 } } }, '[a].[aa].[aaa]', undefined],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa.aaa2', undefined],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa2', undefined],
   [{ a: { aa: { aaa: 10 } } }, 'a2', undefined],
@@ -30,6 +30,17 @@ const data = [
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[]', undefined],
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[+5454]', undefined],
   [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[].bbb', undefined],
+
+  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=3]', 3],
+  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=99]', undefined],
+
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].id', 20],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.1.id', 20],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].data', undefined],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].data.value', undefined],
+  [{ a: [{ id: 10 }, { id: 20, data: {} }] }, 'a.[1].data', {}],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[=id=20]', { id: 20 }],
+  [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[=id=20].id', 20],
 ];
 
 const data2 = [

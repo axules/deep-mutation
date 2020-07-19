@@ -9,6 +9,7 @@ exports.checkIsExists = checkIsExists;
 exports.getValue = getValue;
 exports.isArrayElement = isArrayElement;
 exports.getPairValue = getPairValue;
+exports.getRealIndex = getRealIndex;
 exports.getOptions = getOptions;
 exports.deepPatch = deepPatch;
 exports.default = void 0;
@@ -25,7 +26,7 @@ function XDeepPatchX(value) {
 
 function XIssetMarkerX() {}
 
-var ARRAY_REGEXP = new RegExp('^\\[([^\\[\\].]*)\\]$');
+var ARRAY_REGEXP = new RegExp('^\\[([^\\[\\]]*)\\]$');
 var MUTATE_TYPES = {
   ARRAY: 'array',
   OBJECT: 'object',
@@ -189,17 +190,15 @@ function checkIsExists(pObject, pPath) {
 function getValue(pObject, pPath) {
   if (!checkIsObject(pObject)) return undefined;
   var pieces = splitPath(pPath);
-  if (pieces.length === 0) return pObject;
-
-  function preparePiece(piece) {
-    return piece.replace(/(\[|\])+/g, '');
-  }
+  if (pieces.length === 0) return pObject; // function preparePiece(piece) {
+  //   return piece.replace(/(\[|\])+/g, '');
+  // }
 
   var lastIndex = pieces.length - 1;
   var node = pObject;
 
   for (var i = 0; i < lastIndex; i++) {
-    var piece = preparePiece(pieces[i]);
+    var piece = getRealIndex(node, pieces[i]);
     node = checkIsLocked(node[piece]) ? node[piece].__value__ : node[piece];
 
     if (!node || !checkIsObject(node) || checkIsRemoved(node)) {
@@ -207,11 +206,11 @@ function getValue(pObject, pPath) {
     }
   }
 
-  return node[preparePiece(pieces[lastIndex])];
+  return node[getRealIndex(node, pieces[lastIndex])];
 }
 
-function isArrayElement(value) {
-  return ARRAY_REGEXP.test(value);
+function isArrayElement(key) {
+  return ARRAY_REGEXP.test(key);
 }
 
 function getPairValue(pair) {
@@ -307,34 +306,45 @@ function updateSection(point, tree) {
 
     if (checkIsRemoved(tree[key])) {
       if (opt.isArray) result.splice(k, 1);else delete result[k]; // setValue(result, k, tree[key]);
-    } else {
+    } else if (!opt.isArray || k >= 0) {
       result[k] = updateSection(result[k], tree[key]);
     }
   });
   return result;
 }
 
-function getOptions(key, parentValue) {
-  var realParentValue = checkIsLocked(parentValue) ? parentValue.__value__ : parentValue;
-  var parse = ARRAY_REGEXP.exec(key);
-  var result = {
-    key: key,
-    realKey: key,
-    isArray: !!parse,
-    length: Array.isArray(realParentValue) ? realParentValue.length : 0
-  };
+function getRealIndex(items, key) {
+  var parse = key ? ARRAY_REGEXP.exec(key) : null;
+  if (!parse) return key;
+  var arrayItems = Array.isArray(items) ? items : [];
+  var k = parse[1].trim();
 
-  if (parse) {
-    var k = parse[1].trim();
-    result.key = k;
+  if (k.length == 0 || k.slice(0, 1) == '+') {
+    return arrayItems.length;
+  } else if (k.slice(0, 1) == '=') {
+    var parseCompare = /^=(?:([^=\s]*)=)?(.*)$/.exec(k);
 
-    if (k === '' || k.slice(0, 1) === '+') {
-      result.realKey = result.length;
-    } else {
-      result.realKey = parseInt(k, 10) || 0;
+    if (parseCompare) {
+      var _k = parseCompare[1],
+          v = parseCompare[2];
+      return arrayItems.findIndex(function (el) {
+        return String(_k && el ? getValue(el, _k) : el) === String(v);
+      });
     }
   }
 
+  var index = parseInt(k, 10);
+  return Number.isNaN(index) ? items.length : index;
+}
+
+function getOptions(key, parentValue) {
+  var realParentValue = checkIsLocked(parentValue) ? parentValue.__value__ : parentValue;
+  var result = {
+    key: key,
+    realKey: getRealIndex(realParentValue, key),
+    isArray: isArrayElement(key),
+    length: Array.isArray(realParentValue) ? realParentValue.length : 0
+  };
   return result;
 }
 

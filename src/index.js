@@ -7,7 +7,7 @@ function XDeepPatchX(value) {
 }
 function XIssetMarkerX() {}
 
-const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\].]*)\\]$');
+const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\]]*)\\]$');
 
 const MUTATE_TYPES = {
   ARRAY: 'array',
@@ -173,14 +173,14 @@ export function getValue(pObject, pPath) {
   const pieces = splitPath(pPath);
   if (pieces.length === 0) return pObject;
 
-  function preparePiece(piece) {
-    return piece.replace(/(\[|\])+/g, '');
-  }
+  // function preparePiece(piece) {
+  //   return piece.replace(/(\[|\])+/g, '');
+  // }
 
   const lastIndex = pieces.length - 1;
   let node = pObject;
   for (let i = 0; i < lastIndex; i++) {
-    const piece = preparePiece(pieces[i]);
+    const piece = getRealIndex(node, pieces[i]);
     node = checkIsLocked(node[piece])
       ? node[piece].__value__
       : node[piece];
@@ -189,11 +189,11 @@ export function getValue(pObject, pPath) {
     }
   }
 
-  return node[preparePiece(pieces[lastIndex])];
+  return node[getRealIndex(node, pieces[lastIndex])];
 }
 
-export function isArrayElement(value) {
-  return ARRAY_REGEXP.test(value);
+export function isArrayElement(key) {
+  return ARRAY_REGEXP.test(key);
 }
 
 export function getPairValue(pair) {
@@ -309,34 +309,45 @@ function updateSection(point, tree) {
       if (opt.isArray) result.splice(k, 1);
       else delete result[k];
       // setValue(result, k, tree[key]);
-    } else {
+    } else if (!opt.isArray || k >= 0) {
       result[k] = updateSection(result[k], tree[key]);
     }
   });
   return result;
 }
 
+export function getRealIndex(items, key) {
+  const parse = key ? ARRAY_REGEXP.exec(key) : null;
+  if (!parse) return key;
+  const arrayItems = Array.isArray(items) ? items : [];
+  const k = parse[1].trim();
+
+  if (k.length == 0 || k.slice(0,1) == '+') {
+    return arrayItems.length;
+  } else if (k.slice(0,1) == '=') {
+    const parseCompare = /^=(?:([^=\s]*)=)?(.*)$/.exec(k);
+    if (parseCompare) {
+      const [, k, v] = parseCompare;
+      return arrayItems.findIndex(function (el) {
+        return String(k && el ? getValue(el, k) : el) === String(v);
+      });
+    }
+  }
+
+  const index = parseInt(k, 10);
+  return Number.isNaN(index) ? items.length : index;
+}
+
 export function getOptions(key, parentValue) {
   const realParentValue = checkIsLocked(parentValue)
     ? parentValue.__value__
     : parentValue;
-  const parse = ARRAY_REGEXP.exec(key);
   const result = {
     key: key,
-    realKey: key,
-    isArray: !!parse,
+    realKey: getRealIndex(realParentValue, key),
+    isArray: isArrayElement(key),
     length: Array.isArray(realParentValue) ? realParentValue.length : 0
   };
-
-  if (parse) {
-    const k = parse[1].trim();
-    result.key = k;
-    if (k === '' || k.slice(0,1) === '+') {
-      result.realKey = result.length;
-    } else {
-      result.realKey = parseInt(k, 10) || 0;
-    }
-  }
 
   return result;
 }
