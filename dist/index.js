@@ -1,18 +1,18 @@
 "use strict";
 
 exports.__esModule = true;
-exports.getObjectPaths = getObjectPaths;
-exports.extToArray = extToArray;
-exports.separatePath = separatePath;
-exports.splitPath = splitPath;
 exports.checkIsExists = checkIsExists;
-exports.getValue = getValue;
-exports.isArrayElement = isArrayElement;
-exports.getPairValue = getPairValue;
-exports.getRealIndex = getRealIndex;
-exports.getOptions = getOptions;
 exports.deepPatch = deepPatch;
 exports.default = void 0;
+exports.extToArray = extToArray;
+exports.getObjectPaths = getObjectPaths;
+exports.getOptions = getOptions;
+exports.getPairValue = getPairValue;
+exports.getRealIndex = getRealIndex;
+exports.getValue = getValue;
+exports.isArrayElement = isArrayElement;
+exports.separatePath = separatePath;
+exports.splitPath = splitPath;
 
 function XMutateRemovedElementX() {}
 
