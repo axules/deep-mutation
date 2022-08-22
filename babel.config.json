@@ -7,7 +7,7 @@
       "corejs": "3.24",
       "loose": true,
       "forceAllTransforms": false,
-      "targets": "ie 11, defaults, not dead"
+      "targets": "ie 11"
     }]
   ]
 }
