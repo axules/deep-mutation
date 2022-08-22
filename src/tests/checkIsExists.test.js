@@ -1,7 +1,7 @@
 import { checkIsExists } from '../index';
 
 
-const chekIsExistsData = [
+const checkIsExistsData = [
   [null, 'a', false],
   [[10], '0', true],
   [[{ a: 10 }], '0.a', true],
@@ -43,7 +43,7 @@ const chekIsExistsData = [
   [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[=id=20].id', true],
 ];
 
-const chekIsExistsData2 = [
+const checkIsExistsData2 = [
   [{ a: { aa: { aaa: 10 } } }, 'a'.split('.'), true],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa'.split('.'), true],
   [{ a: { aa: { aaa: 10 } } }, 'a.aa.aaa'.split('.'), true],
@@ -61,12 +61,12 @@ const chekIsExistsData2 = [
 ];
 
 describe('checkIsExists', () => {
-  test.each(chekIsExistsData)('checkIsExists(%j, %s) === %j', (obj, path, expected) => {
+  test.each(checkIsExistsData)('checkIsExists(%j, %s) === %j', (obj, path, expected) => {
     const result = checkIsExists(obj, path);
     expect(result).toEqual(expected);
   });
 
-  test.each(chekIsExistsData2)('checkIsExists(%j, %j) === %j', (obj, path, expected) => {
+  test.each(checkIsExistsData2)('checkIsExists(%j, %j) === %j', (obj, path, expected) => {
     const result = checkIsExists(obj, path);
     expect(result).toEqual(expected);
   });
