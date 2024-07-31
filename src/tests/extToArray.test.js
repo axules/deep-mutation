@@ -1,14 +1,8 @@
 import { extToArray, deepPatch } from '../index';
 
-const data = [
+const testCases = [
   [[['a.b.c', 25]], [['a.b.c', 25]]],
   [[['a.b.c']], [['a.b.c']]],
-  [null, []],
-  [undefined, []],
-  [1, []],
-  ['1123', []],
-  [11.5, []],
-  [new Error(), []],
   [{}, []],
   [[], []],
 
@@ -31,8 +25,41 @@ const data = [
   [{ 'a.a1': deepPatch({ z: 10, z2: { z21: 100 } }), 'a.a1.z': 9999 }, [['a.a1.z', 10], ['a.a1.z2.z21', 100], ['a.a1.z', 9999]]],
 ];
 
+const errorCases = [
+  [null, []],
+  [undefined, []],
+  [1, []],
+  ['1123', []],
+  [11.5, []],
+  [new Error(), []],
+];
+
+const consoleError = console.error;
+
 describe('extToArray', () => {
-  test.each(data)('extToArray(%j) === %j', (data, expected) => {
+  
+  describe('returns error', () => {
+    beforeAll(() => {
+      jest.spyOn(console, 'error');
+      console.error.mockImplementation((error) => {
+        if (error.message.startsWith('Changes should be Object or Array')) {
+          console.debug(`Expected test error: ${error.message}`);
+        } else {
+          consoleError(error);
+        }
+      });
+    });
+
+    afterAll(() => {
+      console.error.mockReset();
+    });
+
+    test.each(errorCases)('extToArray(%j) === %j', (data, expected) => {
+      expect(extToArray(data)).toEqual(expected);
+    });
+  });
+
+  test.each(testCases)('extToArray(%j) === %j', (data, expected) => {
     expect(extToArray(data)).toEqual(expected);
   });
 
@@ -44,6 +71,7 @@ describe('extToArray', () => {
   test('should return array with the same Object', () => {
     const value = { z: 1, z2: 2 };
     const data = { 'a.a2': value };
-    expect(extToArray(data)[0][1]).toBe(value);
+    const result = extToArray(data);
+    expect(result[0][1]).toBe(value);
   });
 });
