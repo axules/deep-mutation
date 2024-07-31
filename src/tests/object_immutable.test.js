@@ -17,35 +17,35 @@ describe('mutate', () => {
       expect(result).toBe(obj);
     });
   
-    test('when new walue is equal of current value', () => {
+    test('when new value is equal of current value', () => {
       const obj = { a: 1 };
       const changes = { a: 1 };
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
 
-    test('when changes cantains instruction to remove undefined elements', () => {
+    test('when changes contains instruction to remove undefined elements', () => {
       const obj = { a: 1 };
       const changes = { b: undefined };
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
 
-    test('when new walue is equal of current value', () => {
+    test('when new value is equal of current value', () => {
       const obj = { a: 1 };
       const changes = { a: 1, b: undefined };
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
   
-    test('when new walue is equal of current value in deep path', () => {
+    test('when new value is equal of current value in deep path', () => {
       const obj = { a: { aa: [1,2,3] } };
       const changes = { 'a.aa.[2]': 3 };
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
   
-    test('when new walue is equal of current value in deep path', () => {
+    test('when new value is equal of current value in deep path', () => {
       const obj = { a: { aa: { aaa: 35 } } };
       const changes = { 'a.aa.aaa': 35 };
       const result = mutate(obj, changes);
@@ -94,7 +94,7 @@ describe('mutate', () => {
       expect(result).toEqual({ a: { aa: { } } });
     });
   
-    test('when new walue is not equal of current value in deep path', () => {
+    test('when new value is not equal of current value in deep path', () => {
       const obj = { a: { aa: [1,2,3] } };
       const changes = { 'a.aa.[2]': 7 };
       const result = mutate(obj, changes);
@@ -102,7 +102,7 @@ describe('mutate', () => {
       expect(result).toEqual({ a: { aa: [1,2,7] } });
     });
   
-    test('when new walue is not equal of current value in deep path', () => {
+    test('when new value is not equal of current value in deep path', () => {
       const obj = { a: { aa: { aaa: 35 } } };
       const changes = { 'a.aa.aaa': 99 };
       const result = mutate(obj, changes);

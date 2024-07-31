@@ -1,5 +1,10 @@
-function XMutateRemovedElementX() {}
-function XMutateLockedElementX(value) {
+export const CONFIG = {
+  reportFunctionMutation: false,
+  reportIncompatibleObjectType: false,
+};
+
+export function XMutateRemovedElementX() {}
+export function XMutateLockedElementX(value) {
   this.__value__ = value;
 }
 function XDeepPatchX(value) {
@@ -7,7 +12,7 @@ function XDeepPatchX(value) {
 }
 function XIssetMarkerX() {}
 
-const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\]]*)\\]$');
+const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\]]*)]$');
 
 const MUTATE_TYPES = {
   ARRAY: 'array',
@@ -65,50 +70,46 @@ export function getObjectPaths(obj, prefix = [], map = null) {
 export function extToArray(pExt) {
   let result = pExt;
   if (!Array.isArray(pExt)) {
-    if (checkIsDeepPatch(pExt)) result = [pExt];
-    else {
-      if (!checkIsNativeObject(pExt)) return [];
-      const keys = Object.keys(pExt || {});
-      result = keys.map(function (key) {
-        return (
-          checkIsUndefined(pExt[key])
-            ? [key]
-            : [key, pExt[key]]
-        );
-      });
+    if (checkIsDeepPatch(pExt)) {
+      result = [pExt];
+    } else {
+      if (!checkIsNativeObject(pExt)) {
+        console.error(new Error('Changes should be Object or Array'));
+        return [];
+      }
+      
+      result = Object.keys(pExt || {})
+        .map((key) => (checkIsUndefined(pExt[key]) ? [key] : [key, pExt[key]]));
     }
   }
 
   return result.reduce(function (R, pair) {
     const isDeep = checkIsDeepPatch(pair);
-    if (!isDeep && (!pair || pair.length < 2)) return R;
+    if (!isDeep && (!pair || pair.length < 2)) {
+      return R;
+    }
 
-    const pairVal = isDeep ? pair : getPairValue(pair);
+    const pairVal = isDeep ? pair : pair[1];
     if (isDeep || checkIsDeepPatch(pairVal)) {
       const pairPath = isDeep || !pair[0] ? undefined : splitPath(pair[0]);
-      const n = R.findIndex(function(el) { return el === pair });
+      const n = R.findIndex((el) => el === pair);
       if (n < 0) return R;
 
-      return R.slice(0, n)
-        .concat(
-          getObjectPaths(pairVal.__value__, pairPath),
-          R.slice(n + 1)
-        );
+      return R.slice(0, n).concat(getObjectPaths(pairVal.__value__, pairPath), R.slice(n + 1));
     }
     return R;
   }, result);
 }
 
 export function separatePath(path) {
-  return typeof(path) == 'string'
-    ? path.replace( new RegExp('([^\\.])(\\[)', 'g'), function (match, p1, p2) {
-      return p1 + '.' + p2;
-    })
+  return checkIsString(path)
+    ? path.replace(new RegExp('([^.])(\\[)', 'g'), (match, p1, p2) => `${p1}.${p2}`)
     : path;
 }
 
 export function splitPath(path) {
-  if (typeof(path) == 'string') return path.split('.');
+  if (checkIsString(path)) return path.split('.');
+  // .split(/(?<!\[[^\]]*)\.(?![^\[]*\])/)
   if (Array.isArray(path)) return path;
   throw new Error('Path should be String or Array of Strings');
 }
@@ -118,23 +119,28 @@ function hasProperty(obj, prop) {
 }
 
 function setValue(parent, key, value) {
+  const isArrayInsert = key && String(key).startsWith('[>');
   const isRemove = checkIsRemoved(value);
-  const isUndefinedKey = checkIsUndefined(key);
-  if (isRemove && (isUndefinedKey || !hasProperty(parent, key))) {
+
+  if (isRemove && (isArrayInsert || !hasProperty(parent, key))) {
     return parent;
   }
 
-  const isLocked = checkIsLocked(parent);
-  if (isUndefinedKey) {
-    if (isLocked) parent.__value__ = value;
-    else return value;
-  } else {
-    const realParent = isLocked ? parent.__value__ : parent;
-    if (isRemove) {
-      if (Array.isArray(realParent)) realParent.splice(key, 1);
-      else delete realParent[key];
-    } else realParent[key] = value;
+  const realParent = checkIsLocked(parent) ? parent.__value__ : parent;
+
+  if (isRemove) {
+    if (Array.isArray(realParent)) realParent.splice(key, 1);
+    else delete realParent[key];
+    return parent;
   }
+
+  if (isArrayInsert) {
+    const index = parseInt(key.slice(2).replace(']', ''), 10);
+    realParent.splice(index, 0, value);
+    return parent;
+  }
+
+  realParent[key] = value;
 
   return parent;
 }
@@ -159,6 +165,14 @@ function checkIsObject(value) {
   return value && typeof(value) === 'object';
 }
 
+function checkIsString(value) {
+  return typeof(value) === 'string';
+}
+
+function checkIsFunction(value) {
+  return value && typeof(value) === 'function';
+}
+
 function checkIsNativeObject(value) {
   return checkIsObject(value) && value.__proto__.constructor.name === 'Object';
 }
@@ -168,7 +182,7 @@ export function checkIsExists(pObject, pPath) {
 }
 
 export function getValue(pObject, pPath) {
-  if (!checkIsObject(pObject)) return undefined;
+  if (!pObject || !checkIsObject(pObject)) return undefined;
 
   const pieces = splitPath(pPath);
   if (pieces.length === 0) return pObject;
@@ -179,11 +193,9 @@ export function getValue(pObject, pPath) {
 
   const lastIndex = pieces.length - 1;
   let node = pObject;
-  for (let i = 0; i < lastIndex; i++) {
+  for (let i = 0; i < lastIndex; i += 1) {
     const piece = getRealIndex(node, pieces[i]);
-    node = checkIsLocked(node[piece])
-      ? node[piece].__value__
-      : node[piece];
+    node = checkIsLocked(node[piece]) ? node[piece].__value__ : node[piece];
     if (!node || !checkIsObject(node) || checkIsRemoved(node)) {
       return undefined;
     }
@@ -193,66 +205,53 @@ export function getValue(pObject, pPath) {
 }
 
 export function isArrayElement(key) {
-  return ARRAY_REGEXP.test(key);
+  return checkIsString(key) && ARRAY_REGEXP.test(key);
 }
 
-export function getPairValue(pair) {
-  if (!Array.isArray(pair) || pair.length === 0) return undefined;
-  const valueIndex = pair.length - 1 || 1;
-  return pair[valueIndex];
-}
-
-function extToTree(pExt, pSource) {
+export function extToTree(pExt, pSource) {
+  let arrayCounter = 100;
   // +++++++++++++++++++++++++++
   function getNewValue(pair, isMutated) {
     if (!pair || pair.length === 0) return undefined;
 
-    if (pair.length === 1) {
+    if (pair.length === 1 || checkIsUndefined(pair[1])) {
       return new XMutateRemovedElementX();
     }
 
-    const pairValue = getPairValue(pair);
-    if (!isMutated && checkIsObject(pairValue)) {
-      return new XMutateLockedElementX(pairValue);
+    if (!isMutated && checkIsObject(pair[1])) {
+      return new XMutateLockedElementX(pair[1]);
     }
 
-    if (checkIsUndefined(pairValue)) {
-      return new XMutateRemovedElementX();
-    }
-
-    return pairValue;
+    return pair[1];
   }
   // +++++++++++++++++++++++++++
-  if (!checkIsObject(pExt)) throw new Error('Changes should be Object or Array');
+  if (!checkIsObject(pExt)) {
+    throw new Error('Changes should be Object or Array');
+  }
   const values = extToArray(pExt);
 
   return values.reduce(function (FULL_RESULT, PAIR) {
     if (!PAIR) return FULL_RESULT;
-    if (typeof(PAIR) === 'string') PAIR = [PAIR];
+    if (checkIsString(PAIR)) PAIR = [PAIR];
     if (!PAIR[0] && PAIR[0] !== 0) {
       throw new Error('Path should not be empty');
     }
 
     const pathPieces = splitPath(separatePath(PAIR[0]));
-    if (PAIR.length < 2 || checkIsUndefined(getPairValue(PAIR))) {
+    if (PAIR.length < 2 || checkIsUndefined(PAIR[1])) {
       if (!(checkIsExists(pSource, pathPieces) || checkIsExists(FULL_RESULT, pathPieces))) {
         return FULL_RESULT;
       }
-    } else {
-      const currentValue = getValue(pSource, pathPieces);
-      if (currentValue === getPairValue(PAIR)) return FULL_RESULT;
+    } else if (getValue(pSource, pathPieces) === PAIR[1]) {
+      return FULL_RESULT;
     }
 
     let isLockedPath = false;
+    // console.log('--------------------');
     pathPieces.reduce(function (parent, currentKey, currentI) {
       const isLastPiece = currentI >= pathPieces.length - 1;
-      const actualKey = currentKey === '[]'
-        ? '[+' + String(Math.random()).slice(2, 12) + ']'
-        : currentKey;
-
-      const newKey = isLockedPath
-        ? getOptions(actualKey, parent).realKey
-        : actualKey;
+      const actualKey = currentKey === '[]' ? `[+${++arrayCounter}]` : currentKey;
+      const newKey = isLockedPath ? getOptions(parent, actualKey).realKey : actualKey;
 
       const isLockedCurrent = !isLockedPath
         && hasProperty(parent, newKey)
@@ -264,27 +263,28 @@ function extToTree(pExt, pSource) {
         const newValue = getNewValue(PAIR, isLockedPath);
         if (isLockedPath) setValue(parent, newKey, newValue);
         else parent[newKey] = newValue;
+        // return ROOT of changes
         return FULL_RESULT;
       }
 
-      const currentValue = (
-        isLockedCurrent
-          ? parent[newKey].__value__
-          : parent[newKey]
-      );
+      const currentValue = isLockedCurrent ? parent[newKey].__value__ : parent[newKey];
 
       if (!checkIsObject(currentValue)) {
-        // if (!!currentValue) {
-        //   console.warn(`Warning: In "${PAIR[0]}", bad value for "${currentKey}", it will be replaced by empty Object ({})`);
-        // }
+        if (currentValue && CONFIG.reportIncompatibleObjectType) {
+          console.error(new Error(`Warning: In "${PAIR[0]}", bad value for "${currentKey}", it will be replaced by empty Object ({})`));
+        }
         const newValue = {};
         if (isLockedPath) setValue(parent, newKey, newValue);
         else parent[newKey] = newValue;
+
+        // return new position in tree
         return newValue;
       }
 
+      // return current position in tree
       return currentValue;
     }, FULL_RESULT);
+
     return FULL_RESULT;
   }, {});
 }
@@ -294,7 +294,16 @@ function updateSection(point, tree) {
     !tree
     || Array.isArray(tree)
     || !checkIsObject(tree)
-  ) return tree;
+  ) {
+    return tree;
+  }
+
+  if (checkIsFunction(tree)) {
+    if (CONFIG.reportFunctionMutation) {
+      console.error(new Error('Function mutation'));
+    }
+    return tree(point);
+  }
 
   if (checkIsLocked(tree)) return tree.__value__;
 
@@ -303,13 +312,22 @@ function updateSection(point, tree) {
   const result = mutateObj(point, needArray ? MUTATE_TYPES.ARRAY : MUTATE_TYPES.OBJECT);
 
   pieces.forEach(function (key) {
-    const opt = getOptions(key, result);
+    const opt = getOptions(result, key);
     const k = opt.realKey;
+    
     if (checkIsRemoved(tree[key])) {
       if (opt.isArray) result.splice(k, 1);
       else delete result[k];
-      // setValue(result, k, tree[key]);
-    } else if (!opt.isArray || k >= 0) {
+      return;
+    }
+
+    if (key && String(key).startsWith('[>')) {
+      const index = parseInt(key.slice(2).replace(']',''), 10);
+      result.splice(index, 0, updateSection(result[index], tree[key]));
+      return;
+    }
+
+    if (!opt.isArray || k >= 0) {
       result[k] = updateSection(result[k], tree[key]);
     }
   });
@@ -319,18 +337,26 @@ function updateSection(point, tree) {
 export function getRealIndex(items, key) {
   const parse = key ? ARRAY_REGEXP.exec(key) : null;
   if (!parse) return key;
-  const arrayItems = Array.isArray(items) ? items : [];
+
   const k = parse[1].trim();
 
-  if (k.length == 0 || k.slice(0,1) == '+') {
+  if (k.startsWith('>')) {
+    // [>2] || [>2...]
+    return k;
+  }
+
+  const arrayItems = Array.isArray(items) ? items : [];
+
+  if (k.length == 0 || k.startsWith('+')) {
     return arrayItems.length;
-  } else if (k.slice(0,1) == '=') {
+  }
+
+  if (k.startsWith('=')) {
+    // [=10] || [=id=99]
     const parseCompare = /^=(?:([^=\s]*)=)?(.*)$/.exec(k);
     if (parseCompare) {
       const [, k, v] = parseCompare;
-      return arrayItems.findIndex(function (el) {
-        return String(k && el ? getValue(el, k) : el) === String(v);
-      });
+      return arrayItems.findIndex((el) => String(k && el ? getValue(el, k) : el) === String(v));
     }
   }
 
@@ -338,23 +364,21 @@ export function getRealIndex(items, key) {
   return Number.isNaN(index) ? items.length : index;
 }
 
-export function getOptions(key, parentValue) {
+export function getOptions(parentValue, key) {
   const realParentValue = checkIsLocked(parentValue)
     ? parentValue.__value__
     : parentValue;
-  const result = {
+  return {
     key: key,
     realKey: getRealIndex(realParentValue, key),
     isArray: isArrayElement(key),
     length: Array.isArray(realParentValue) ? realParentValue.length : 0
   };
-
-  return result;
 }
 
 function mutate(pObj, pExt) {
   if (!checkIsObject(pObj)) {
-    throw new Error('Type of variable shoud be Object or Array');
+    throw new Error('Type of variable should be Object or Array');
   }
 
   if (checkIsUndefined(pExt)) {
@@ -365,6 +389,7 @@ function mutate(pObj, pExt) {
   if (Object.getOwnPropertyNames(tree).length === 0) {
     return pObj;
   }
+
   return updateSection(pObj, tree);
 }
 

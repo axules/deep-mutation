@@ -86,7 +86,7 @@ const result = mutate(myObject, changes);
 
 #### 'result' will be
 ```javascript
-{
+const obj = {
   a: 111,
   b: {
     b1: 222,
@@ -97,7 +97,7 @@ const result = mutate(myObject, changes);
   },
   d: [10,20],
   e: [1,2,3]
-}
+};
 ```
 
 ### Changes can be specified as an array of arrays or an object where each key is a path or object converted by `deepPatch` function:
@@ -149,50 +149,59 @@ const changes = deepPatch({
 
 ## Array specific keys
 
-### :> a.[] or a.[+242234]
+### a.[] (or a.[+242234])
+
 If a key for an array item starts from `+`, then the **value will be appended to the end of the array** like `[].push()`.
 ```javascript
-...
-  'arr.[+123312312]': 100
+const patch = {
+  'arr.[+123312312]': 100,
 // OR
-  'arr.[+6]': 100
+  'arr.[+6]': 100,
 // will be equal to
-  'arr.[]': 100
-...
+  'arr.[]': 100,
+};
 ```
-It is usefult when you need to add some items to an array and use changes as an Object.
+
+It is useful when you need to add some items to an array and use changes as an Object.
 ```javascript
 import muatate from 'deep-mutation';
-...
-return mutate({ arr: [] }, {
-  // It is an error because JS object can't have values with the same keys!
-  // 'arr.[]': 1,
-  // 'arr.[]': 2,
-
-  //It is the correct way
-  'arr.[+1123]': 1,
-  'arr.[+232]': 2,
-  'arr.[+43534]': 3,
-  'arr.[+64]': 4,
-  'arr.[]': 5,
-});
+// ...
+return mutate(
+  { arr: [] }, 
+  {
+    // It is an error because JS object can't have values with the same keys!
+    // 'arr.[]': 1,
+    // 'arr.[]': 2,
+  
+    //It is the correct way
+    'arr.[+1123]': 1,
+    'arr.[+232]': 2,
+    'arr.[+43534]': 3,
+    'arr.[+64]': 4,
+    'arr.[]': 5,
+  }
+);
 
 // the result will be = { arr: [1,2,3,4,5] }
 ```
-### :> arr.[=10] or arr.[=id=15]
+
+### arr.[=10] or arr.[=id=15]
 
 If a key for an array item starts from `=` ([=10] or [=data.id=99]), then index will be found by comparison item or item's property and value. `[=field.path=value]`.
 ```javascript
 import muatate from 'deep-mutation';
-...
-return mutate({ arr: [1,2,3,4,5,6,7,8] }, {
-  'arr.[=2]': 200,
-  // index for element with value `2` will be `1`
-  'arr.[=8]': 800,
-  // index for element with value `8` will be `7`
-  'arr.[=100]': 'undefined',
-  // `100` is not found in arr and will be ignored, index is `-1`
-});
+// ...
+return mutate(
+  { arr: [1,2,3,4,5,6,7,8] }, 
+  {
+    'arr.[=2]': 200,
+    // index for element with value `2` will be `1`
+    'arr.[=8]': 800,
+    // index for element with value `8` will be `7`
+    'arr.[=100]': 'undefined',
+    // `100` is not found in arr and will be ignored, index is `-1`
+  }
+);
 
 // the result will be = { arr: [1,200,3,4,5,6,7,800] }
 ```
@@ -202,13 +211,16 @@ return mutate({ arr: [1,2,3,4,5,6,7,8] }, {
 Example for objects
 ```javascript
 import muatate from 'deep-mutation';
-...
-return mutate({ arr: [{ id: 10 }, { id: 20 }] }, {
-  'arr.[=id=20].name': 'Name 20',
-  // index for element with `id=20` will be `1`
-  'arr.[=id=999]': 'undefined',
-  // it is not found, ignored
-});
+// ...
+return mutate(
+  { arr: [{ id: 10 }, { id: 20 }] }, 
+  {
+    'arr.[=id=20].name': 'Name 20',
+    // index for element with `id=20` will be `1`
+    'arr.[=id=999]': 'undefined',
+    // it is not found, ignored
+  }
+);
 
 // the result will be = { arr: [{ id: 10 }, { id: 20, name: 'Name 20' }] }
 ```
@@ -216,28 +228,49 @@ return mutate({ arr: [{ id: 10 }, { id: 20 }] }, {
 Example with deep path
 ```javascript
 import muatate from 'deep-mutation';
-...
-return mutate({ arr: [{ data: { id: 12 }}, { data: { id: 30 }}] }, {
-  'arr.[=data.id=12].data.v': 'value1',
-  // index for element with `data.id=12` will be `0`
-  'arr.[=data.id=999]': 'undefined',
-  // it is not found, ignored
-});
+// ...
+return mutate(
+  { arr: [{ data: { id: 12 }}, { data: { id: 30 }}] }, 
+  {
+    'arr.[=data.id=12].data.v': 'value1',
+    // index for element with `data.id=12` will be `0`
+    'arr.[=data.id=999]': 'undefined',
+    // it is not found, ignored
+  }
+);
 
 // the result will be = { arr: [{ data: { id: 12, v: 'value1' }}, { data: { id: 30 }}] }
 ```
 
-### :> arr.[-1]
+### arr.[-1]
+
 It will be **ignored**.
 
 ```javascript
 import muatate from 'deep-mutation';
-...
-return mutate({ arr: [1,2,3,4] }, {
-  'arr.[-1]': 999,
-});
+// ...
+return mutate(
+  { arr: [1,2,3,4] }, 
+  { 'arr.[-1]': 999 }
+);
 
 // the result will be = { arr: [1,2,3,4] }
+```
+
+### arr.[>2]
+
+It will insert element onto provided position.
+
+```javascript
+import muatate from 'deep-mutation';
+// ...
+return mutate(
+  { arr: [1,2,3,4] }, 
+  { 'arr.[>2]': 555 },
+  { 'arr.[>3]': 999 },
+);
+
+// the result will be = { arr: [1,2,555,999,3,4] }
 ```
 
 ## mutate.deep(...) or deepPatch(...)
@@ -256,7 +289,9 @@ return mutate.deep(
 
 // result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
 ```
+
 **OR**
+
 ```javascript
 import mutate, { deepPatch } from 'deep-mutation';
 
@@ -344,12 +379,12 @@ const result = mutate(obj, changes);
 ```javascript
 mutate({ a: 10 }, [['a', 5]]); // { a: 5 }
 mutate({ a: 10 }, [['b', 5]]); // { a: 10, b: 5 }
-mutate({}, [['a', 10]), ['b', 5]]); // { a: 10, b: 5 }
+mutate({}, [['a', 10], ['b', 5]]); // { a: 10, b: 5 }
 mutate({ a: 10 }, [['a']]); // { }
 mutate({ a: 10 }, [null]); // { a: 10 }
-mutate({ a: 10 }, [['a']); // ['b']]); // { }
+mutate({ a: 10 }, [['a']]); // ['b']]); // { }
 mutate({ a: 10 }, ['a', 'b']); // { }
-mutate({ a: 10 }, [['a']); // ['b', 5]]); // { b: 5 }
+mutate({ a: 10 }, [['a']]); // ['b', 5]]); // { b: 5 }
 mutate({ a: 10 }, [['a', [1,2,3]]]); // { a: [1,2,3] }
 mutate({ a: 10 }, [['a', { aa: 1 }]]); // { a: { aa: 1 } }
 mutate({ a: 10 }, [['a', 5], ['b', { bb: 2 }]]); // { a: 5, b: { bb: 2 } }

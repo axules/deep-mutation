@@ -8,7 +8,7 @@ describe('mutate', () => {
     try {
       mutate(obj, changes);
     } catch (ex) {
-      expect(ex.message).toBe('Type of variable shoud be Object or Array');
+      expect(ex.message).toBe('Type of variable should be Object or Array');
     }
   });
 
@@ -18,7 +18,7 @@ describe('mutate', () => {
     try {
       mutate(obj, changes);
     } catch (ex) {
-      expect(ex.message).toBe('Type of variable shoud be Object or Array');
+      expect(ex.message).toBe('Type of variable should be Object or Array');
     }
   });
 
@@ -138,6 +138,91 @@ describe('mutate', () => {
     expect(result.b).toEqual(patchArray);
     expect(result.b).toBe(patchArray);
     expect(patchArray).toEqual([1,2,3,4]);
+  });
+
+  test('should mutate array', () => {
+    const obj = [5,6,7,8,9,10];
+    const patched = [5,6,'X',8,'Y',10,1,2,3];
+    const changes = [
+      ['[]', 1],
+      ['[]', 2],
+      ['[]', 3],
+      ['[2]', 'X'],
+      ['[4]', 'Y']
+    ];
+    const result = mutate(obj, changes);
+    expect(result).toEqual(patched);
+  });
+
+  test('should insert item into array', () => {
+    const obj = [5,6,7,8,9,10];
+    const patched = [222,'XXX',5,333,6,7,8,9,10,1, 'XXX'];
+    const changes = [
+      ['[]', 1],
+      ['[>0]', 222],
+      ['[>1]', 'XXX'],
+      ['[>3]', 333],
+      ['[>20]', 'XXX'],
+    ];
+    const result = mutate(obj, changes);
+    expect(result).toEqual(patched);
+  });
+
+  test('should mutate element of array', () => {
+    const obj = [5,{ a: 1, c: 3 }];
+    const patched = [5,{ a: 1, b: 7, d: ['x', 'Z', 'q'] },9];
+    const changes = [
+      ['[1].c'],
+      ['[1].b', 7],
+      ['[1].d[]', 'x'],
+      ['[1].d[]', 'y'],
+      ['[1].d[1]', 'Z'],
+      ['[1].d[]', 'q'],
+      ['[]', 9],
+    ];
+    const result = mutate(obj, changes);
+    expect(result).toEqual(patched);
+  });
+
+  test('should add and mutate element of array', () => {
+    const obj = [5,{ a: 1, c: 3 }];
+    const patched = [5,{ a: 1, c: 3, d: { d1: 'y', d2: 'Z' } }];
+    const changes = [
+      ['[1].d', {}],
+      ['[1].d.d1', 'y'],
+      ['[1].d.d2', 'Z'],
+    ];
+    const result = mutate(obj, changes);
+    expect(result).toEqual(patched);
+  });
+
+  test('should ignore previously changed prop', () => {
+    const obj = [5,{ a: 1, c: 3 }];
+    const patched = [5,{ a: 1, c: 3, d: { d2: 'Z' } }];
+    const changes = [
+      // it will be ignored
+      ['[1].d.d1', 'y'],
+      // because this resets `d` object
+      ['[1].d', {}],
+      ['[1].d.d2', 'Z'],
+    ];
+    const result = mutate(obj, changes);
+    expect(result).toEqual(patched);
+  });
+
+  test('should mutate source data', () => {
+    const obj = {};
+    const source = { a: 1, b: 2 };
+    const patched = { data: { ...source, key: 7 } };
+    const changes = [
+      ['data', source],
+      // data.key is similar to `source.key=7`, before mutation
+      ['data.key', 7],
+    ];
+    const result = mutate(obj, changes);
+
+    expect(result).toEqual(patched);
+    expect(source).toEqual({ a: 1, b: 2, key: 7 });
   });
 
   test('should returns equal results for Array and Object changes', () => {
