@@ -1,4 +1,4 @@
-import mutate from '../index';
+import { mutate } from '../index';
 
 
 describe('mutate', () => {
@@ -72,14 +72,14 @@ describe('mutate', () => {
     MyClass.prototype = Object.create(MyParentClass.prototype);
 
     const obj = { };
-    const itArray = [1,2,3];
+    const itArray = [1, 2, 3];
     const itMyObject = new MyClass();
 
     const itObject = { b1: 1, b2: 2 };
     const changes = [
       ['a.a1', itArray],
       ['a.a2', itMyObject],
-      ['b', itObject]
+      ['b', itObject],
     ];
     const result = mutate(obj, changes);
 
@@ -93,7 +93,7 @@ describe('mutate', () => {
   test('should replace by object value', () => {
     const obj = { b: { b5: 5, b6: 6 } };
     const changes = {
-      b: { b1: 1, b2: 2, b3: 3 }
+      b: { b1: 1, b2: 2, b3: 3 },
     };
     const result = mutate(obj, changes);
 
@@ -102,9 +102,9 @@ describe('mutate', () => {
   });
 
   test('should replace by array value', () => {
-    const obj = { b: [5,6] };
+    const obj = { b: [5, 6] };
     const changes = {
-      b: [1,2,3]
+      b: [1, 2, 3],
     };
     const result = mutate(obj, changes);
 
@@ -117,7 +117,7 @@ describe('mutate', () => {
     const patchObject = { b1: 1, b2: 2, b3: 3 };
     const changes = [
       ['b', patchObject],
-      ['b.b4', 4]
+      ['b.b4', 4],
     ];
     const result = mutate(obj, changes);
 
@@ -127,36 +127,36 @@ describe('mutate', () => {
   });
 
   test('should change array value', () => {
-    const obj = { b: [5,6] };
-    const patchArray = [1,2,3];
+    const obj = { b: [5, 6] };
+    const patchArray = [1, 2, 3];
     const changes = [
       ['b', patchArray],
-      ['b.[]', 4]
+      ['b.[]', 4],
     ];
     const result = mutate(obj, changes);
 
     expect(result.b).toEqual(patchArray);
     expect(result.b).toBe(patchArray);
-    expect(patchArray).toEqual([1,2,3,4]);
+    expect(patchArray).toEqual([1, 2, 3, 4]);
   });
 
   test('should mutate array', () => {
-    const obj = [5,6,7,8,9,10];
-    const patched = [5,6,'X',8,'Y',10,1,2,3];
+    const obj = [5, 6, 7, 8, 9, 10];
+    const patched = [5, 6, 'X', 8, 'Y', 10, 1, 2, 3];
     const changes = [
       ['[]', 1],
       ['[]', 2],
       ['[]', 3],
       ['[2]', 'X'],
-      ['[4]', 'Y']
+      ['[4]', 'Y'],
     ];
     const result = mutate(obj, changes);
     expect(result).toEqual(patched);
   });
 
   test('should insert item into array', () => {
-    const obj = [5,6,7,8,9,10];
-    const patched = [222,'XXX',5,333,6,7,8,9,10,1, 'XXX'];
+    const obj = [5, 6, 7, 8, 9, 10];
+    const patched = [222, 'XXX', 5, 333, 6, 7, 8, 9, 10, 1, 'XXX'];
     const changes = [
       ['[]', 1],
       ['[>0]', 222],
@@ -169,8 +169,8 @@ describe('mutate', () => {
   });
 
   test('should mutate element of array', () => {
-    const obj = [5,{ a: 1, c: 3 }];
-    const patched = [5,{ a: 1, b: 7, d: ['x', 'Z', 'q'] },9];
+    const obj = [5, { a: 1, c: 3 }];
+    const patched = [5, { a: 1, b: 7, d: ['x', 'Z', 'q'] }, 9];
     const changes = [
       ['[1].c'],
       ['[1].b', 7],
@@ -185,8 +185,8 @@ describe('mutate', () => {
   });
 
   test('should add and mutate element of array', () => {
-    const obj = [5,{ a: 1, c: 3 }];
-    const patched = [5,{ a: 1, c: 3, d: { d1: 'y', d2: 'Z' } }];
+    const obj = [5, { a: 1, c: 3 }];
+    const patched = [5, { a: 1, c: 3, d: { d1: 'y', d2: 'Z' } }];
     const changes = [
       ['[1].d', {}],
       ['[1].d.d1', 'y'],
@@ -197,8 +197,8 @@ describe('mutate', () => {
   });
 
   test('should ignore previously changed prop', () => {
-    const obj = [5,{ a: 1, c: 3 }];
-    const patched = [5,{ a: 1, c: 3, d: { d2: 'Z' } }];
+    const obj = [5, { a: 1, c: 3 }];
+    const patched = [5, { a: 1, c: 3, d: { d2: 'Z' } }];
     const changes = [
       // it will be ignored
       ['[1].d.d1', 'y'],
@@ -231,9 +231,9 @@ describe('mutate', () => {
       b: 200,
       c: {
         c1: 1,
-        c2: 2
+        c2: 2,
       },
-      d: []
+      d: [],
     };
 
     const arrayChanges = [
@@ -244,18 +244,18 @@ describe('mutate', () => {
       ['c.c2'],
       ['d.[]', 10],
       ['d.[]', 20],
-      ['e', [1,2,3]]
+      ['e', [1, 2, 3]],
     ];
 
     const objectChanges = {
-      'a': 111,
+      a: 111,
       'b.b1': 222,
       'b.b2': 'text',
       'c.c1': 20,
       'c.c2': undefined,
       'd.[+123434]': 10,
       'd.[+554542]': 20,
-      'e': [1,2,3]
+      e: [1, 2, 3],
     };
 
     const result1 = mutate(obj, arrayChanges);
@@ -288,7 +288,7 @@ describe('mutate', () => {
       expect(result).toEqual({
         a: 200,
         b: [300],
-        c: 99
+        c: 99,
       });
     });
   });

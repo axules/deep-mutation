@@ -46,7 +46,7 @@ const result = {
 #### doing the same with `deep-mutation`
 
 ```javascript
-import mutate from 'deep-mutation';
+import { mutate, mutateDeep, deepPatch } from 'deep-mutation';
 const resultMutate = mutate(obj, { 'c.c3.c32': 25 });
 // OR
 const resultMutate = mutate(obj, [['c.c3.c32', 25]]);
@@ -54,11 +54,15 @@ const resultMutate = mutate(obj, [['c.c3.c32', 25]]);
 const resultMutate = mutate(obj, [[['c', 'c3', 'c32'], 25]]);
 // OR since v3.0.0
 const resultMutate = mutate.deep(obj, { c: { c3: { c32: 25 } } });
+// OR since v3.0.0
+const resultMutate = mutate(obj, deepPatch({ c: { c3: { c32: 25 } } }));
+// OR since v3.3.1
+const resultMutate = mutateDeep(obj, { c: { c3: { c32: 25 } } });
 ```
 
 ### Simple example
 ```javascript
-import mutate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 
 const myObject = {
   a: 100,
@@ -164,7 +168,7 @@ const patch = {
 
 It is useful when you need to add some items to an array and use changes as an Object.
 ```javascript
-import muatate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 // ...
 return mutate(
   { arr: [] }, 
@@ -189,7 +193,7 @@ return mutate(
 
 If a key for an array item starts from `=` ([=10] or [=data.id=99]), then index will be found by comparison item or item's property and value. `[=field.path=value]`.
 ```javascript
-import muatate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 // ...
 return mutate(
   { arr: [1,2,3,4,5,6,7,8] }, 
@@ -210,7 +214,7 @@ return mutate(
 
 Example for objects
 ```javascript
-import muatate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 // ...
 return mutate(
   { arr: [{ id: 10 }, { id: 20 }] }, 
@@ -227,7 +231,7 @@ return mutate(
 
 Example with deep path
 ```javascript
-import muatate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 // ...
 return mutate(
   { arr: [{ data: { id: 12 }}, { data: { id: 30 }}] }, 
@@ -247,7 +251,7 @@ return mutate(
 It will be **ignored**.
 
 ```javascript
-import muatate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 // ...
 return mutate(
   { arr: [1,2,3,4] }, 
@@ -262,7 +266,7 @@ return mutate(
 It will insert element onto provided position.
 
 ```javascript
-import muatate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 // ...
 return mutate(
   { arr: [1,2,3,4] }, 
@@ -275,22 +279,33 @@ return mutate(
 
 ## mutate.deep(...) or deepPatch(...)
 
-`deepPatch(patchObject: Object): PatchObject`
-
-`mutate.deep(sourceObject: Object, patchObject: Object): Object`
+`mutate.deep(sourceObject: Object, patchObject: Object): Object` - returns new object with deep patched result. The same that `mutateDeep`.
 
 ```javascript
-import mutate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 
 return mutate.deep(
   { a: 10, b: { b1: 1, b2: 2 }}, // main object
   { c: 50, b: { b2: 100 } } // changes
 );
-
 // result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
 ```
 
 **OR**
+
+```javascript
+import { mutateDeep } from 'deep-mutation';
+
+return mutateDeep(
+  { a: 10, b: { b1: 1, b2: 2 }}, // main object
+  { c: 50, b: { b2: 100 } } // changes
+);
+// result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
+```
+
+**OR**
+
+`deepPatch(patchObject: Object): PatchObject` - returns instruction for deep patching
 
 ```javascript
 import mutate, { deepPatch } from 'deep-mutation';
@@ -313,7 +328,7 @@ If `deep-mutation` function is called only with one argument (an object without 
 
 
 ```javascript
-import mutate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 
 const patch = mutate({ a: 1, b: 2});
 
@@ -339,7 +354,7 @@ In order to use dots in the path of changes you should use the path as an Array 
 
 
 ```javascript
-import mutate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 
 const obj = {
   a: {
@@ -565,7 +580,7 @@ test('should change array value', () => {
 
 ## In redux
 ```javascript
-import mutate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 
 export default (state = {}, action) => {
   const { type, payload } = action;
@@ -599,7 +614,7 @@ export default (state = {}, action) => {
 
 ## In component's state
 ```javascript
-import mutate from 'deep-mutation';
+import { mutate } from 'deep-mutation';
 
 class ExampleComponent extends Component {
   // ...

@@ -38,7 +38,7 @@ module.exports = {
 
   coverageReporters: [
     'text',
-    'lcov'
+    'lcov',
   ],
 
   // An object that configures minimum threshold enforcement for coverage results
@@ -143,7 +143,7 @@ module.exports = {
   // ],
 
   testMatch: [
-    '<rootDir>/src/**/*.test.js'
+    '<rootDir>/src/**/*.test.js',
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped

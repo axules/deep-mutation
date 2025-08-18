@@ -14,6 +14,8 @@ exports.getOptions = getOptions;
 exports.getRealIndex = getRealIndex;
 exports.getValue = getValue;
 exports.isArrayElement = isArrayElement;
+exports.mutate = mutate;
+exports.mutateDeep = mutateDeep;
 exports.separatePath = separatePath;
 exports.splitPath = splitPath;
 var CONFIG = exports.CONFIG = {
@@ -330,6 +332,13 @@ function getOptions(parentValue, key) {
     length: Array.isArray(realParentValue) ? realParentValue.length : 0
   };
 }
+
+/**
+ * Returns new patched object
+ * @param {Object} pObj
+ * @param {Object|Array} [pExt]
+ * @returns {Object|Function}
+ */
 function mutate(pObj, pExt) {
   if (!checkIsObject(pObj)) {
     throw new Error('Type of variable should be Object or Array');
@@ -347,15 +356,31 @@ function deepPatch(pExt) {
   if (checkIsDeepPatch(pExt)) return pExt;
   return new XDeepPatchX(pExt);
 }
-mutate.deep = function (pObj, pExt) {
-  var newExt = null;
+
+/**
+ * Returns new patched object.
+ * @param {Object} pObj - initial object which should be patched.
+ * @param {Object|Array} pExt - patch object.
+ * @returns {Object}
+ * @example
+ * import { mutateDeep } from 'deep-mutation';
+ *
+ * return mutateDeep(
+ *   { a: 10, b: { b1: 1, b2: 2 }}, // main object
+ *   { c: 50, b: { b2: 100 } } // changes
+ * );
+ * // result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
+ */
+function mutateDeep(pObj, pExt) {
+  var newExt;
   if (Array.isArray(pExt)) {
     newExt = pExt.map(function (el) {
       return deepPatch(el);
     });
   } else newExt = deepPatch(pExt);
   return mutate(pObj, newExt);
-};
+}
+mutate.deep = mutateDeep;
 function toFunction(pObj) {
   var result = pObj;
   return function (pExt) {
@@ -364,4 +389,8 @@ function toFunction(pObj) {
     return result;
   };
 }
+
+/**
+ * Use `import { mutate } from 'deep-mutation';`
+ */
 var _default = exports.default = mutate;
