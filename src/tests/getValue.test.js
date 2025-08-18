@@ -24,15 +24,15 @@ const data = [
   [{ a: { aa: { aaa: 10 } } }, 'a.aa2.aaa', undefined],
   [{ a: { aa: { aaa: 10 } } }, 'a2.aa.aaa', undefined],
 
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[0]', 1],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[2]', 3],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[3]', undefined],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[]', undefined],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[+5454]', undefined],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[].bbb', undefined],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[0]', 1],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[2]', 3],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[3]', undefined],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[]', undefined],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[+5454]', undefined],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[].bbb', undefined],
 
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=3]', 3],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=99]', undefined],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[=3]', 3],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[=99]', undefined],
 
   [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].id', 20],
   [{ a: [{ id: 10 }, { id: 20 }] }, 'a.1.id', 20],
@@ -54,10 +54,10 @@ const data2 = [
   [{ a: { aa: { aaa: 10 } } }, 'a.aa2.aaa'.split('.'), undefined],
   [{ a: { aa: { aaa: 10 } } }, 'a2.aa.aaa'.split('.'), undefined],
 
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.0'.split('.'), 1],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.2'.split('.'), 3],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.3'.split('.'), undefined],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.'.split('.'), undefined],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.0'.split('.'), 1],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.2'.split('.'), 3],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.3'.split('.'), undefined],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.'.split('.'), undefined],
 ];
 
 describe('getValue', () => {

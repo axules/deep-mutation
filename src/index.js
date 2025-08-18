@@ -17,7 +17,7 @@ const ARRAY_REGEXP = new RegExp('^\\[([^\\[\\]]*)]$');
 const MUTATE_TYPES = {
   ARRAY: 'array',
   OBJECT: 'object',
-  DEFAULT: ''
+  DEFAULT: '',
 };
 
 function mutateObj(point, vType) {
@@ -51,7 +51,7 @@ export function getObjectPaths(obj, prefix = [], map = null) {
     } else if (checkIsDeepPatch(value)) {
       getObjectPaths(value.__value__, currentPath, myMap);
     } else {
-      const containsDot = currentPath.some(function (el) { return el.indexOf('.') >= 0 });
+      const containsDot = currentPath.some(function (el) { return el.indexOf('.') >= 0; });
       myMap.set(containsDot ? currentPath : currentPath.join('.'), value);
     }
   }
@@ -77,7 +77,7 @@ export function extToArray(pExt) {
         console.error(new Error('Changes should be Object or Array'));
         return [];
       }
-      
+
       result = Object.keys(pExt || {})
         .map((key) => (checkIsUndefined(pExt[key]) ? [key] : [key, pExt[key]]));
     }
@@ -314,7 +314,7 @@ function updateSection(point, tree) {
   pieces.forEach(function (key) {
     const opt = getOptions(result, key);
     const k = opt.realKey;
-    
+
     if (checkIsRemoved(tree[key])) {
       if (opt.isArray) result.splice(k, 1);
       else delete result[k];
@@ -322,7 +322,7 @@ function updateSection(point, tree) {
     }
 
     if (key && String(key).startsWith('[>')) {
-      const index = parseInt(key.slice(2).replace(']',''), 10);
+      const index = parseInt(key.slice(2).replace(']', ''), 10);
       result.splice(index, 0, updateSection(result[index], tree[key]));
       return;
     }
@@ -372,11 +372,17 @@ export function getOptions(parentValue, key) {
     key: key,
     realKey: getRealIndex(realParentValue, key),
     isArray: isArrayElement(key),
-    length: Array.isArray(realParentValue) ? realParentValue.length : 0
+    length: Array.isArray(realParentValue) ? realParentValue.length : 0,
   };
 }
 
-function mutate(pObj, pExt) {
+/**
+ * Returns new patched object
+ * @param {Object} pObj
+ * @param {Object|Array} [pExt]
+ * @returns {Object|Function}
+ */
+export function mutate(pObj, pExt) {
   if (!checkIsObject(pObj)) {
     throw new Error('Type of variable should be Object or Array');
   }
@@ -398,17 +404,33 @@ export function deepPatch(pExt) {
   return new XDeepPatchX(pExt);
 }
 
-mutate.deep = function (pObj, pExt) {
-  let newExt = null;
+/**
+ * Returns new patched object.
+ * @param {Object} pObj - initial object which should be patched.
+ * @param {Object|Array} pExt - patch object.
+ * @returns {Object}
+ * @example
+ * import { mutateDeep } from 'deep-mutation';
+ *
+ * return mutateDeep(
+ *   { a: 10, b: { b1: 1, b2: 2 }}, // main object
+ *   { c: 50, b: { b2: 100 } } // changes
+ * );
+ * // result = { a: 10, b: { b1: 1, b2: 100 }, c: 50}
+ */
+export function mutateDeep(pObj, pExt) {
+  let newExt;
   if (Array.isArray(pExt)) {
-    newExt = pExt.map(function (el) { return deepPatch(el) });
+    newExt = pExt.map(function (el) { return deepPatch(el); });
   } else newExt = deepPatch(pExt);
 
   return mutate(pObj, newExt);
-};
+}
+
+mutate.deep = mutateDeep;
 
 function toFunction(pObj) {
-  var result = pObj;
+  let result = pObj;
 
   return function(pExt) {
     if (checkIsUndefined(pExt)) return result;
@@ -417,4 +439,7 @@ function toFunction(pObj) {
   };
 }
 
+/**
+ * Use `import { mutate } from 'deep-mutation';`
+ */
 export default mutate;

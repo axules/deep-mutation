@@ -22,7 +22,10 @@ const testCases = [
   [[deepPatch({ z: 10, z2: { z21: 100 } })], [['z', 10], ['z2.z21', 100]]],
   [deepPatch({ z: 10, z2: { z21: 100 } }), [['z', 10], ['z2.z21', 100]]],
 
-  [{ 'a.a1': deepPatch({ z: 10, z2: { z21: 100 } }), 'a.a1.z': 9999 }, [['a.a1.z', 10], ['a.a1.z2.z21', 100], ['a.a1.z', 9999]]],
+  [{
+    'a.a1': deepPatch({ z: 10, z2: { z21: 100 } }),
+    'a.a1.z': 9999,
+  }, [['a.a1.z', 10], ['a.a1.z2.z21', 100], ['a.a1.z', 9999]]],
 ];
 
 const errorCases = [
@@ -37,12 +40,13 @@ const errorCases = [
 const consoleError = console.error;
 
 describe('extToArray', () => {
-  
+
   describe('returns error', () => {
     beforeAll(() => {
       jest.spyOn(console, 'error');
       console.error.mockImplementation((error) => {
         if (error.message.startsWith('Changes should be Object or Array')) {
+          // eslint-disable-next-line no-console
           console.debug(`Expected test error: ${error.message}`);
         } else {
           consoleError(error);

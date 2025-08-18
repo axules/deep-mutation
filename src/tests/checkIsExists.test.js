@@ -24,15 +24,15 @@ const checkIsExistsData = [
   [{ a: { aa: { aaa: 10 } } }, 'a.aa2.aaa', false],
   [{ a: { aa: { aaa: 10 } } }, 'a2.aa.aaa', false],
 
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[0]', true],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[2]', true],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[3]', false],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[]', false],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[+5454]', false],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[].bbb', false],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[0]', true],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[2]', true],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[3]', false],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[]', false],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[+5454]', false],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[].bbb', false],
 
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=3]', true],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.[=99]', false],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[=3]', true],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.[=99]', false],
 
   [{ a: [{ id: 10 }, { id: 20 }] }, 'a.[1].id', true],
   [{ a: [{ id: 10 }, { id: 20 }] }, 'a.1.id', true],
@@ -54,10 +54,10 @@ const checkIsExistsData2 = [
   [{ a: { aa: { aaa: 10 } } }, 'a.aa2.aaa'.split('.'), false],
   [{ a: { aa: { aaa: 10 } } }, 'a2.aa.aaa'.split('.'), false],
 
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.0'.split('.'), true],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.2'.split('.'), true],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.3'.split('.'), false],
-  [{ a: { aa: { aaa: [1,2,3] } } }, 'a.aa.aaa.'.split('.'), false],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.0'.split('.'), true],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.2'.split('.'), true],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.3'.split('.'), false],
+  [{ a: { aa: { aaa: [1, 2, 3] } } }, 'a.aa.aaa.'.split('.'), false],
 ];
 
 describe('checkIsExists', () => {

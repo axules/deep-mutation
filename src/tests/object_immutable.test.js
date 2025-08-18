@@ -2,21 +2,21 @@ import mutate from '../index';
 
 
 describe('mutate', () => {
-  describe( 'should return the same object', () => {
+  describe('should return the same object', () => {
     test('when changes are empty array', () => {
       const obj = { a: 1 };
       const changes = [];
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
-  
+
     test('when changes are empty object', () => {
       const obj = { a: 1 };
       const changes = {};
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
-  
+
     test('when new value is equal of current value', () => {
       const obj = { a: 1 };
       const changes = { a: 1 };
@@ -37,14 +37,14 @@ describe('mutate', () => {
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
-  
+
     test('when new value is equal of current value in deep path', () => {
-      const obj = { a: { aa: [1,2,3] } };
+      const obj = { a: { aa: [1, 2, 3] } };
       const changes = { 'a.aa.[2]': 3 };
       const result = mutate(obj, changes);
       expect(result).toBe(obj);
     });
-  
+
     test('when new value is equal of current value in deep path', () => {
       const obj = { a: { aa: { aaa: 35 } } };
       const changes = { 'a.aa.aaa': 35 };
@@ -53,7 +53,7 @@ describe('mutate', () => {
     });
   });
 
-  describe( 'should return new object', () => {
+  describe('should return new object', () => {
     test('when changes contains new value as array', () => {
       const obj = { a: 1 };
       const changes = [['a', 15]];
@@ -61,7 +61,7 @@ describe('mutate', () => {
       expect(result).not.toBe(obj);
       expect(result).toEqual({ a: 15 });
     });
-  
+
     test('when changes contains new value as object', () => {
       const obj = { a: 1 };
       const changes = { a: 30 };
@@ -93,15 +93,15 @@ describe('mutate', () => {
       expect(result).not.toBe(obj);
       expect(result).toEqual({ a: { aa: { } } });
     });
-  
+
     test('when new value is not equal of current value in deep path', () => {
-      const obj = { a: { aa: [1,2,3] } };
+      const obj = { a: { aa: [1, 2, 3] } };
       const changes = { 'a.aa.[2]': 7 };
       const result = mutate(obj, changes);
       expect(result).not.toBe(obj);
-      expect(result).toEqual({ a: { aa: [1,2,7] } });
+      expect(result).toEqual({ a: { aa: [1, 2, 7] } });
     });
-  
+
     test('when new value is not equal of current value in deep path', () => {
       const obj = { a: { aa: { aaa: 35 } } };
       const changes = { 'a.aa.aaa': 99 };
