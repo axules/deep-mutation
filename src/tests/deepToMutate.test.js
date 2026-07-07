@@ -1,5 +1,6 @@
 import mutate, { deepPatch } from '../index';
 
+
 const data = [
   [
     { a: { a1: { a11: 10 }, a2: 20 }, b: 99 },

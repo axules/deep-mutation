@@ -20,6 +20,42 @@ const MUTATE_TYPES = {
   DEFAULT: '',
 };
 
+function checkIsObject(value) {
+  return value && typeof (value) === 'object';
+}
+
+function checkIsNativeObject(value) {
+  return checkIsObject(value) && value.__proto__.constructor.name === 'Object';
+}
+
+function checkIsUndefined(value) {
+  return typeof (value) === 'undefined';
+}
+
+function checkIsRemoved(pObj) {
+  return pObj instanceof XMutateRemovedElementX;
+}
+
+function checkIsLocked(pObj) {
+  return pObj instanceof XMutateLockedElementX;
+}
+
+function checkIsDeepPatch(value) {
+  return value instanceof XDeepPatchX;
+}
+
+function checkIsString(value) {
+  return typeof (value) === 'string';
+}
+
+function checkIsFunction(value) {
+  return value && typeof (value) === 'function';
+}
+
+export function isArrayElement(key) {
+  return checkIsString(key) && ARRAY_REGEXP.test(key);
+}
+
 function mutateObj(point, vType) {
   if (!point) return vType === MUTATE_TYPES.ARRAY ? [] : {};
   if (Array.isArray(point)) return [].concat(point);
@@ -35,7 +71,7 @@ export function getObjectPaths(obj, prefix = [], map = null) {
   const keys = Object.keys(obj);
   const isRoot = !map;
   const myMap = isRoot
-    // eslint-disable-next-line no-undef
+
     ? new Map()
     : map;
 
@@ -51,20 +87,27 @@ export function getObjectPaths(obj, prefix = [], map = null) {
     } else if (checkIsDeepPatch(value)) {
       getObjectPaths(value.__value__, currentPath, myMap);
     } else {
-      const containsDot = currentPath.some(function (el) { return el.indexOf('.') >= 0; });
+      const containsDot = currentPath.some((el) => el.indexOf('.') >= 0);
       myMap.set(containsDot ? currentPath : currentPath.join('.'), value);
     }
   }
 
   if (isRoot) {
     const result = [];
-    myMap.forEach(function(val, key) {
+    myMap.forEach(function (val, key) {
       if (val instanceof XIssetMarkerX) return false;
       result.push([key, val]);
     });
     return result;
   }
   return null;
+}
+
+export function splitPath(path) {
+  if (checkIsString(path)) return path.split('.');
+  // .split(/(?<!\[[^\]]*)\.(?![^\[]*\])/)
+  if (Array.isArray(path)) return path;
+  throw new Error('Path should be String or Array of Strings');
 }
 
 export function extToArray(pExt) {
@@ -107,13 +150,6 @@ export function separatePath(path) {
     : path;
 }
 
-export function splitPath(path) {
-  if (checkIsString(path)) return path.split('.');
-  // .split(/(?<!\[[^\]]*)\.(?![^\[]*\])/)
-  if (Array.isArray(path)) return path;
-  throw new Error('Path should be String or Array of Strings');
-}
-
 function hasProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
@@ -145,40 +181,47 @@ function setValue(parent, key, value) {
   return parent;
 }
 
-function checkIsUndefined(value) {
-  return typeof(value) === 'undefined';
+export function getRealIndex(items, key) {
+  const parse = key ? ARRAY_REGEXP.exec(key) : null;
+  if (!parse) return key;
+
+  const k = parse[1].trim();
+
+  if (k.startsWith('>')) {
+    // [>2] || [>2...]
+    return k;
+  }
+
+  const arrayItems = Array.isArray(items) ? items : [];
+
+  if (k.length <= 0 || k.startsWith('+')) {
+    return arrayItems.length;
+  }
+
+  if (k.startsWith('=')) {
+    // [=10] || [=id=99]
+    const parseCompare = /^=(?:([^=\s]*)=)?(.*)$/.exec(k);
+    if (parseCompare) {
+      const [, k, v] = parseCompare;
+      // eslint-disable-next-line no-use-before-define
+      return arrayItems.findIndex((el) => String(k && el ? getValue(el, k) : el) === String(v));
+    }
+  }
+
+  const index = parseInt(k, 10);
+  return Number.isNaN(index) ? items.length : index;
 }
 
-function checkIsRemoved(pObj) {
-  return pObj instanceof XMutateRemovedElementX;
-}
-
-function checkIsLocked(pObj) {
-  return pObj instanceof XMutateLockedElementX;
-}
-
-function checkIsDeepPatch(value) {
-  return value instanceof XDeepPatchX;
-}
-
-function checkIsObject(value) {
-  return value && typeof(value) === 'object';
-}
-
-function checkIsString(value) {
-  return typeof(value) === 'string';
-}
-
-function checkIsFunction(value) {
-  return value && typeof(value) === 'function';
-}
-
-function checkIsNativeObject(value) {
-  return checkIsObject(value) && value.__proto__.constructor.name === 'Object';
-}
-// It has been exported for tests, but you could use it if needed
-export function checkIsExists(pObject, pPath) {
-  return !checkIsUndefined(getValue(pObject, pPath));
+export function getOptions(parentValue, key) {
+  const realParentValue = checkIsLocked(parentValue)
+    ? parentValue.__value__
+    : parentValue;
+  return {
+    key: key,
+    realKey: getRealIndex(realParentValue, key),
+    isArray: isArrayElement(key),
+    length: Array.isArray(realParentValue) ? realParentValue.length : 0,
+  };
 }
 
 export function getValue(pObject, pPath) {
@@ -204,8 +247,9 @@ export function getValue(pObject, pPath) {
   return node[getRealIndex(node, pieces[lastIndex])];
 }
 
-export function isArrayElement(key) {
-  return checkIsString(key) && ARRAY_REGEXP.test(key);
+// It has been exported for tests, but you could use it if needed
+export function checkIsExists(pObject, pPath) {
+  return !checkIsUndefined(getValue(pObject, pPath));
 }
 
 export function extToTree(pExt, pSource) {
@@ -289,6 +333,7 @@ export function extToTree(pExt, pSource) {
   }, {});
 }
 
+
 function updateSection(point, tree) {
   if (
     !tree
@@ -334,48 +379,6 @@ function updateSection(point, tree) {
   return result;
 }
 
-export function getRealIndex(items, key) {
-  const parse = key ? ARRAY_REGEXP.exec(key) : null;
-  if (!parse) return key;
-
-  const k = parse[1].trim();
-
-  if (k.startsWith('>')) {
-    // [>2] || [>2...]
-    return k;
-  }
-
-  const arrayItems = Array.isArray(items) ? items : [];
-
-  if (k.length == 0 || k.startsWith('+')) {
-    return arrayItems.length;
-  }
-
-  if (k.startsWith('=')) {
-    // [=10] || [=id=99]
-    const parseCompare = /^=(?:([^=\s]*)=)?(.*)$/.exec(k);
-    if (parseCompare) {
-      const [, k, v] = parseCompare;
-      return arrayItems.findIndex((el) => String(k && el ? getValue(el, k) : el) === String(v));
-    }
-  }
-
-  const index = parseInt(k, 10);
-  return Number.isNaN(index) ? items.length : index;
-}
-
-export function getOptions(parentValue, key) {
-  const realParentValue = checkIsLocked(parentValue)
-    ? parentValue.__value__
-    : parentValue;
-  return {
-    key: key,
-    realKey: getRealIndex(realParentValue, key),
-    isArray: isArrayElement(key),
-    length: Array.isArray(realParentValue) ? realParentValue.length : 0,
-  };
-}
-
 /**
  * Returns new patched object
  * @param {Object} pObj
@@ -388,6 +391,7 @@ export function mutate(pObj, pExt) {
   }
 
   if (checkIsUndefined(pExt)) {
+    // eslint-disable-next-line no-use-before-define
     return toFunction(pObj);
   }
 
@@ -421,7 +425,7 @@ export function deepPatch(pExt) {
 export function mutateDeep(pObj, pExt) {
   let newExt;
   if (Array.isArray(pExt)) {
-    newExt = pExt.map(function (el) { return deepPatch(el); });
+    newExt = pExt.map((el) => deepPatch(el));
   } else newExt = deepPatch(pExt);
 
   return mutate(pObj, newExt);
@@ -432,7 +436,7 @@ mutate.deep = mutateDeep;
 function toFunction(pObj) {
   let result = pObj;
 
-  return function(pExt) {
+  return function (pExt) {
     if (checkIsUndefined(pExt)) return result;
     result = mutate(result, pExt);
     return result;

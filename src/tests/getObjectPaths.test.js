@@ -1,5 +1,6 @@
 import { getObjectPaths } from '../index';
 
+
 const errorValue = new Error('Example');
 const recursivePath = {
   a: 10,

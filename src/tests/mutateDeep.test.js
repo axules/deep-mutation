@@ -1,4 +1,9 @@
-import { mutate, mutateDeep, deepPatch } from '../index';
+import {
+  mutate,
+  mutateDeep,
+  deepPatch,
+} from '../index';
+
 
 const data = [
   [

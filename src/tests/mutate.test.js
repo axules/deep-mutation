@@ -24,7 +24,7 @@ describe('mutate', () => {
 
   test('should except by path', () => {
     const obj = { a: 100 };
-    const changes = [ ['', 1000] ];
+    const changes = [['', 1000]];
     try {
       mutate(obj, changes);
     } catch (ex) {

@@ -1,5 +1,6 @@
 import { separatePath } from '../index';
 
+
 const data = [
   ['a[]', 'a.[]'],
   ['a.[]', 'a.[]'],

@@ -1,4 +1,8 @@
-import { extToArray, deepPatch } from '../index';
+import {
+  extToArray,
+  deepPatch,
+} from '../index';
+
 
 const testCases = [
   [[['a.b.c', 25]], [['a.b.c', 25]]],
@@ -40,7 +44,6 @@ const errorCases = [
 const consoleError = console.error;
 
 describe('extToArray', () => {
-
   describe('returns error', () => {
     beforeAll(() => {
       jest.spyOn(console, 'error');

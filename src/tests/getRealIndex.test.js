@@ -1,5 +1,6 @@
 import { getRealIndex } from '../index';
 
+
 const data = [
   [[10, 20, 30], '()', '()'],
   [[10, 20, 30], '', ''],

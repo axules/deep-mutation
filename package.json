@@ -3,7 +3,7 @@
   "version": "3.3.1",
   "author": {
     "name": "Shelest Denis",
-    "email": "axules@gmail.com"
+    "email": "axules@mail.ru"
   },
   "bugs": {
     "url": "https://github.com/axules/deep-mutation/issues"
@@ -11,10 +11,15 @@
   "contributors": [
     {
       "name": "Denis Shelest",
-      "email": "axules@gmail.com"
+      "email": "axules@mail.ru"
     }
   ],
   "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
   "deprecated": false,
   "description": "The mutate method returns new object with changes",
   "keywords": [
@@ -38,23 +43,24 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
-    "@babel/cli": "^7.28.3",
-    "@babel/core": "^7.28.3",
-    "@babel/eslint-parser": "^7.28.0",
-    "@babel/node": "^7.28.0",
-    "@babel/preset-env": "^7.28.3",
-    "@babel/runtime-corejs3": "^7.28.3",
-    "babel-jest": "^30.0.5",
-    "babel-loader": "^10.0.0",
-    "core-js": "^3.45.0",
-    "eslint": "^8.57.1",
-    "eslint-plugin-babel": "^5.3.1",
-    "eslint-plugin-flowtype": "^8.0.3",
-    "eslint-plugin-import": "^2.32.0",
-    "jest": "^30.0.5"
+    "@babel/cli": "8.0.1",
+    "@babel/core": "8.0.1",
+    "@babel/eslint-parser": "8.0.1",
+    "@babel/node": "8.0.1",
+    "@babel/preset-env": "8.0.2",
+    "babel-jest": "30.4.1",
+    "babel-loader": "10.1.1",
+    "core-js": "3.49.0",
+    "eslint": "10.6.0",
+    "globals": "17.7.0",
+    "eslint-plugin-import": "2.32.0",
+    "@stylistic/eslint-plugin": "6.0.0-beta.5",
+    "eslint-plugin-import-newlines": "2.0.0",
+    "eslint-plugin-es": "4.1.0",
+    "eslint-presets": "github:axules/eslint-presets#master",
+    "jest": "30.4.2"
   },
-  "files": [
-    "dist",
-    "src"
-  ]
+  "overrides": {
+    "eslint": "10.6.0"
+  }
 }

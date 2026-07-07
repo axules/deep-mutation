@@ -1,4 +1,8 @@
-import { extToTree, XMutateLockedElementX } from '../index';
+import {
+  extToTree,
+  XMutateLockedElementX,
+} from '../index';
+
 
 const testCases = [
   [

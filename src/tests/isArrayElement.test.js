@@ -1,5 +1,6 @@
 import { isArrayElement } from '../index';
 
+
 const data = [
   ['[]', true],
   ['[+12312]', true],

@@ -1,5 +1,6 @@
 import { splitPath } from '../index';
 
+
 const data = [
   ['a.b.c', ['a', 'b', 'c']],
   ['a.', ['a', '']],
