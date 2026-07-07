@@ -30,24 +30,23 @@ const todos = [
   {
     id: 998941425,
     title: 'Add useful somthing',
-    description: 'I would like to make something interesting and useful'
+    description: 'I would like to make something interesting and useful',
     steps: [
       { id: 1, text: 'idea', isFinished: false },
       { id: 2, text: 'prepare', isFinished: false },
       { id: 3, text: 'make', isFinished: false }
     ]
   },
-  ...
+  // ...
 ];
-
 ...
 
 function findTodo(todoId) {
-  return todos.find(el => el.id == todoId);
+  return todos.findIndex(el => el.id == todoId);
 }
 
 function findStep(todo, stepId) {
-  return todos.find(el => el.id == todoId);
+  return todo.steps.findIndex(el => el.id == stepId);
 }
 
 function changeStepState(todoId, stepId, isFinished) {
@@ -75,8 +74,8 @@ function addStep(todoId, text) {
   const newStep = { id: Math.floor(Math.random() * 10000), text, isFinished: false };
   return mutate(
     todos,
-    { [`[${todoPos}].steps.[]`]: newStep };
-  )
+    { [`[${todoPos}].steps.[]`]: newStep }
+  );
 }
 
 function removeStep(todoId, stepId) {
@@ -84,7 +83,7 @@ function removeStep(todoId, stepId) {
   const stepPos = findStep(todos[todoPos], stepId);
   return mutate(
     todos,
-    { [`[${todoPos}].steps.[${stepPos}].text`]: undefined }
-  )
+    { [`[${todoPos}].steps.[${stepPos}]`]: undefined }
+  );
 }
 ```

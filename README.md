@@ -2,16 +2,17 @@
 
 1. [What is it?](#what-is-it)
 2. [Installation](#installation)
-3. [What does it do?](#installation)
+3. [What does it do?](#what-does-it-do)
     * [Simple example](#simple-example)
     * [Array specific keys](#array-specific-keys)
     * [mutate.deep(..) or deepPatch(...)](#mutatedeep-or-deeppatch)
     * [Deep-mutation can return updater-function](#deep-mutation-can-return-updater-function)
-4. [Immutable comparison](#immutable-comparison)
-5. [Tests cases / code example](#tests-cases--code-example)
-6. [Use cases for 'deep-mutation'](#use-cases-for-deep-mutation)
-7. [Live TODO Example in Codesandbox](https://codesandbox.io/s/deep-mutation-todo-1w022)
-8. [Examples](./EXAMPLES.md)
+4. [API summary](#api-summary)
+5. [Immutable comparison](#immutable-comparison)
+6. [Test cases / code example](#test-cases--code-example)
+7. [Use cases for 'deep-mutation'](#use-cases-for-deep-mutation)
+8. [Live TODO Example in Codesandbox](https://codesandbox.io/s/deep-mutation-todo-1w022)
+9. [Examples](./EXAMPLES.md)
 
 ## What is it?
 
@@ -209,8 +210,8 @@ return mutate(
 
 // the result will be = { arr: [1,200,3,4,5,6,7,800] }
 ```
-`arr.[=]` or `arr.[=value=]` - to find empty string value in array (or item.value = '')
-`arr.[=false]` or `arr.[=value=]` - to find 'false' value in array (or item.value = false)
+`arr.[=]` or `arr.[=value=]` - to find empty string value in array (or `item.value = ''`)
+`arr.[=false]` or `arr.[=value=false]` - to find `false` value in array (or `item.value = false`)
 
 Example for objects
 ```javascript
@@ -342,6 +343,15 @@ const result3 = patch();
 // result3 === result2 === { a: 1, b: 2, c: 3, d: 4}
 ```
 
+## API summary
+
+| Function | Description                                                             |
+|---|-------------------------------------------------------------------------|
+| [`mutate(obj, changes)`](src/index.js) | Main function. It takes object and changes to apply, returns new object |
+| [`mutate.deep(obj, patch)`](src/index.js) | Deep objec upgrade. Aliase: `mutateDeep`                                |
+| [`mutateDeep(obj, patch)`](src/index.js) | Aliase for `mutate.deep`                                                |
+| [`deepPatch(obj)`](src/index.js) | Translate flat object to deep update instruction for `mutate`           |
+
 ## `deep-mutation` supports dots in path since v2.1.0
 
 In order to use dots in the path of changes you should use the path as an Array of keys:
@@ -387,7 +397,7 @@ const result = mutate(obj, changes);
 
 ![deep-mutation vs immutable performance](./ImmutableComparison/SyntaxComparison.png)
 
-# Tests cases / code example
+# Test cases / code example
 ### [Go to tests](./src/tests)
 
 
@@ -397,9 +407,7 @@ mutate({ a: 10 }, [['b', 5]]); // { a: 10, b: 5 }
 mutate({}, [['a', 10], ['b', 5]]); // { a: 10, b: 5 }
 mutate({ a: 10 }, [['a']]); // { }
 mutate({ a: 10 }, [null]); // { a: 10 }
-mutate({ a: 10 }, [['a']]); // ['b']]); // { }
-mutate({ a: 10 }, ['a', 'b']); // { }
-mutate({ a: 10 }, [['a']]); // ['b', 5]]); // { b: 5 }
+mutate({ a: 10 }, [['a'], ['b']]); // { } — same as above
 mutate({ a: 10 }, [['a', [1,2,3]]]); // { a: [1,2,3] }
 mutate({ a: 10 }, [['a', { aa: 1 }]]); // { a: { aa: 1 } }
 mutate({ a: 10 }, [['a', 5], ['b', { bb: 2 }]]); // { a: 5, b: { bb: 2 } }
@@ -536,11 +544,11 @@ mutate(
 */
 ```
 
-### It returns the same object (**works since version 2.0.0**)
+### It returns the same object when nothing was changed (**works since version 2.0.0**)
 ```javascript
 const obj = { a: 10 };
 const result = mutate(obj, []);
-expect(result).not.toBe(obj);
+expect(result).toBe(obj);
 ```
 
 # (!!!) Attention! Важно! Achtung!
